@@ -18,48 +18,63 @@
 
 ## <a name="hebrew"></a>🇮🇱 עברית
 
+<div dir="rtl">
+
 ### 📖 תיאור הפרויקט
 
 **Dana's Brain** היא מערכת AI מתקדמת שמייצרת תוכן שיווקי מקצועי בעברית תוך שימוש ב-RAG (Retrieval-Augmented Generation) ו-Multi-Agent System.
 
 המערכת מחקה את סגנון הכתיבה הייחודי של דנה (מנהלת שיווק ב-Lierac ישראל) ומייצרת תוכן מותאם לכל פלטפורמה: LinkedIn, Facebook ו-Instagram.
 
+</div>
+
+<div dir="rtl">
+
 ### ✨ תכונות עיקריות
 
-- 🤖 **2 סוכני AI אוטונומיים:**
-  - **Strategy Architect** - מנתח את המוצר ויוצר בריף אסטרטגי
-  - **Dana Copywriter** - כותבת תוכן בסגנון של דנה
-  
-- 📚 **RAG (Retrieval-Augmented Generation):**
-  - חיפוש סמנטי במסמכי ידע (מתודולוגיה, דוגמאות, סגנון)
-  - ChromaDB כמסד נתונים ווקטורי
-  - OpenAI Embeddings לחיפוש מדויק
-  
-- 📱 **9 פוסטים מוכנים לפרסום:**
-  - 3 פוסטים ל-LinkedIn (מקצועי וחם)
-  - 3 פוסטים ל-Facebook (אישי וסיפורי)
-  - 3 פוסטים ל-Instagram (קצר וקליט)
-  
-- 🎨 **ממשק Chainlit אינטראקטיבי:**
-  - טפסים דינמיים להזנת מידע
-  - בחירת פרסונה (Professional, Friendly, Inspirational, Mentor)
-  - שקיפות מלאה בתהליך העבודה של הסוכנים
-  
-- 💾 **שמירה אוטומטית:**
-  - קבצי Markdown עם כל התוכן שנוצר
-  - תיקיית `outputs/` עם timestamp וסימון ברור
+**🤖 שני סוכני AI אוטונומיים:**
+- Strategy Architect - מנתח את המוצר ויוצר בריף אסטרטגי
+- Dana Copywriter - כותבת תוכן בסגנון של דנה
+
+**📚 RAG (Retrieval-Augmented Generation):**
+- חיפוש סמנטי במסמכי ידע
+- ChromaDB כמסד נתונים ווקטורי
+- OpenAI Embeddings לחיפוש מדויק
+
+**📱 9 פוסטים מוכנים לפרסום:**
+- 3 פוסטים ל-LinkedIn (מקצועי וחם)
+- 3 פוסטים ל-Facebook (אישי וסיפורי)
+- 3 פוסטים ל-Instagram (קצר וקליט)
+
+**🎨 ממשק Chainlit אינטראקטיבי:**
+- טפסים דינמיים להזנת מידע
+- 4 סגנונות פרסונה של דנה
+- שקיפות מלאה בתהליך העבודה
+
+**💾 שמירה אוטומטית:**
+- קבצי Markdown עם כל התוכן
+- תיקיית outputs עם timestamp
+
+</div>
 
 ### 🎯 תהליך העבודה
 
-```mermaid
-graph LR
-    A[משתמש מזין מידע] --> B[Strategy Architect]
-    B --> C[RAG Search - Methodology]
-    C --> D[Strategic Brief בעברית]
-    D --> E[Dana Copywriter]
-    E --> F[RAG Search - Voice & Style]
-    F --> G[9 Posts מותאמים]
-    G --> H[שמירה ל-MD + הצגה בUI]
+```
+📝 משתמש מזין מידע (מוצר, יתרונות, קהל יעד, הצעה)
+         ↓
+🎯 Strategy Architect
+         ↓ (חיפוש במתודולוגיה)
+📚 RAG Search - Methodology
+         ↓
+📊 Strategic Brief בעברית
+         ↓
+✍️ Dana Copywriter
+         ↓ (חיפוש בדוגמאות וסגנון)
+📚 RAG Search - Voice & Style  
+         ↓
+📱 9 Posts מותאמים (LinkedIn, Facebook, Instagram)
+         ↓
+💾 שמירה ל-MD + הצגה בUI
 ```
 
 ### 🛠️ טכנולוגיות
@@ -215,6 +230,8 @@ MIT License - ראה קובץ [LICENSE](LICENSE)
 - **Lierac Israel** - על דוגמאות התוכן
 - **CrewAI Team** - על ה-framework המדהים
 - **Chainlit Team** - על הממשק המעולה
+
+</div>
 
 ---
 
