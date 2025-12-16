@@ -2,6 +2,7 @@
 """
 Dana's Brain - Autonomous Marketing AI Agents
 Main Chainlit application with full UI implementation
+Version: 1.0 - RAG Implementation
 """
 
 import sys
