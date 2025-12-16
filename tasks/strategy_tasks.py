@@ -2,56 +2,44 @@ from crewai import Task
 
 def create_strategy_task(agent, inputs):
     """
-    Create a strategic analysis task with English instructions but Hebrew output.
-    Uses RAG tool to search for relevant methodology information.
+    Create a strategic analysis task that relies entirely on RAG searches.
+    The agent must search for methodology and structure - nothing is hardcoded.
     """
     return Task(
         description=f"""
-Analyze the following raw product data:
-Product Name: {inputs['product']}
-Key Benefits: {inputs['benefits']}
-Target Audience: {inputs['audience']}
-The Offer: {inputs['offer']}
-Selected Persona: {inputs['persona']}
+Analyze this product data and create a comprehensive 'Campaign Bible' strategy document:
 
-**IMPORTANT: USE YOUR SEARCH TOOL** to find relevant methodology and frameworks from Dana's knowledge base.
-Search for:
-- "שאלות אבחון" (diagnostic questions)
-- "GAP Analysis" (gap analysis methodology)
-- "פרוטוקול השקה" (launch protocol)
-- "ארכיטיפים" (post archetypes)
+**Product Data:**
+- Product Name: {inputs['product']}
+- Key Benefits: {inputs['benefits']}
+- Target Audience: {inputs['audience']}
+- The Offer: {inputs['offer']}
+- Selected Persona: {inputs['persona']}
 
-Based on your search results, create a comprehensive 'Campaign Bible' document.
+**YOUR TASK:**
+Create a strategic "Campaign Bible" document that will guide the copywriter.
 
-STRICT LANGUAGE REQUIREMENT: The final output must be written 100% in HEBREW. Do not use English in the final response.
+**MANDATORY - SEARCH FIRST:**
+Before writing anything, USE YOUR SEARCH TOOL to find:
+1. Dana's strategic frameworks: Search "שאלות אבחון", "GAP Analysis", "פרוטוקול השקה"
+2. Campaign structure methodology: Search "מבנה מסע פרסום", "ארכיטיפים"
+3. Feature-to-benefit translation method: Search "תרגום פיצ'רים לתועלות"
+4. Platform strategy guidelines: Search "אסטרטגיה לפלטפורמות"
 
-The document must follow this exact structure:
+**WORKFLOW:**
+1. SEARCH for Dana's methodology documents
+2. UNDERSTAND the frameworks you found
+3. APPLY those frameworks to analyze the product data
+4. CREATE the Campaign Bible following the structure you discovered
 
-PART A: THE DEEP DIVE (Business Analysis)
-- **Product Philosophy**: Why does this exist? What is the 'Magic' or unique value?
-- **Simplified Science**: Explain the technology/method simply (how the benefits serve the audience).
-- **Sensory Experience**: How does it feel/smell/look?
+**OUTPUT REQUIREMENTS:**
+- Language: 100% Hebrew (עברית)
+- Structure: Follow the Campaign Bible format found in your searches
+- Content: Based on product data + Dana's methodology
+- Purpose: Provide strategic foundation for the copywriter agent
 
-PART B: STRATEGIC LENS (Gaps & Psychology)
-- **The Gap**: Define the customer's current pain vs. the relief this product offers.
-- **Buying Barriers**: What is the main objection or hesitation preventing the purchase? (Crucial).
-- **Psychological Trigger**: What is the main emotion? (FOMO, Relief, Pride?).
-
-PART C: CREATIVE TOOLKIT (Ingredients for the Copywriter)
-- **Hooks Bank**: Provide 3 different opening lines (Emotional, Rational, Sales-focused).
-- **Storytelling Angles**: Suggest 2-3 specific stories, analogies, or examples that demonstrate the value.
-- **Feature-to-Benefit Table**: Translate 3 key features into "Dana-style" deep benefits.
-- **The Offer Framing**: How to present the price/gift to make it irresistible.
-
-PART D: PLATFORM STRATEGY (Tailored Insights)
-- **LinkedIn**: Specific tone instructions and content focus for professional framing.
-- **Facebook**: Recommendations for community-oriented or engagement-focused content.
-- **Instagram**: Visual angles and lifestyle messaging recommendations.
+NEVER invent methodologies - only use what you find through searches.
 """,
-        expected_output="""A fully structured 'Campaign Bible' document in Hebrew, containing:
-1. Deep Dive (Philosophy, Science, Senses)
-2. Strategic Lens (Gap, Barriers, Triggers)
-3. Creative Toolkit (Hooks, Stories, Benefits)
-4. Platform Strategy (LinkedIn, FB, Insta)""",
+        expected_output="""A comprehensive 'Campaign Bible' document in Hebrew following Dana's methodology structure discovered through searches. Should include strategic analysis, gap identification, creative toolkit, and platform-specific recommendations.""",
         agent=agent
     )

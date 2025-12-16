@@ -98,6 +98,54 @@ def create_style_guide_tool():
     )
 
 
+def create_platform_specs_tool():
+    """
+    Tool for Dana Copywriter to search platform specifications
+    (LinkedIn, Facebook, Instagram rules)
+    """
+    collection_config = VECTORDB_CONFIG.copy()
+    collection_config["config"]["collection_name"] = "platform_specifications"
+
+    return TXTSearchTool(
+        txt=str(DATA_DIR / "platform_specifications.txt"),
+        config={
+            "llm": {
+                "provider": "openai",
+                "config": {
+                    "model": "gpt-4o-mini",
+                    "temperature": 0.3
+                }
+            },
+            "embedder": EMBEDDING_CONFIG,
+            "vectordb": collection_config
+        }
+    )
+
+
+def create_post_archetypes_tool():
+    """
+    Tool for Dana Copywriter to search post archetype definitions
+    (Heart/Head/Hands framework)
+    """
+    collection_config = VECTORDB_CONFIG.copy()
+    collection_config["config"]["collection_name"] = "post_archetypes"
+
+    return TXTSearchTool(
+        txt=str(DATA_DIR / "post_archetypes.txt"),
+        config={
+            "llm": {
+                "provider": "openai",
+                "config": {
+                    "model": "gpt-4o-mini",
+                    "temperature": 0.3
+                }
+            },
+            "embedder": EMBEDDING_CONFIG,
+            "vectordb": collection_config
+        }
+    )
+
+
 def initialize_all_tools():
     """
     Initialize all tools at startup
@@ -108,7 +156,9 @@ def initialize_all_tools():
     tools = {
         "methodology": create_methodology_tool(),
         "voice_examples": create_voice_examples_tool(),
-        "style_guide": create_style_guide_tool()
+        "style_guide": create_style_guide_tool(),
+        "platform_specs": create_platform_specs_tool(),
+        "post_archetypes": create_post_archetypes_tool()
     }
 
     print("✅ All TXTSearchTools initialized successfully!")

@@ -1,0 +1,197 @@
+# ארכיטיפ פוסטים - מדריך Heart, Head, Hands
+# Post Archetypes Guide - Heart, Head, Hands Framework
+
+---
+
+## ARCHETYPE 1: HEART (הלב - פוסט רגשי)
+## THE EMOTIONAL POST
+
+### מטרה / Purpose
+יצירת חיבור רגשי ואמון עם הקהל.
+Create emotional connection and trust with the audience.
+
+### מיקוד / Focus
+- נקודות כאב רגשיות (Pain points)
+- אמפתיה והזדהות (Empathy)
+- פגיעות ואותנטיות (Vulnerability & Authenticity)
+- טון "החברה הכי טובה" (Best Friend tone)
+
+### טריגרים רגשיים / Emotional Triggers
+- **הכרה:** "מרגישה את זה גם?" (Recognition: "Feeling this too?")
+- **הקלה:** "את לא לבד בזה" (Relief: "You're not alone")
+- **הבנה:** "אני מבינה בדיוק מה עברת" (Understanding)
+- **תקווה:** "יש דרך לצאת מזה" (Hope: "There's a way out")
+
+### מבנה מומלץ / Recommended Structure
+1. **פתיחה:** תיאור הכאב או התסכול (Pain description)
+2. **גוף:** הזדהות והבנה עמוקה (Empathy and deep understanding)
+3. **מעבר:** תקווה והראיית אור (Transition to hope)
+4. **סיום:** CTA עדין ומזמין (Gentle, inviting CTA)
+
+### דוגמאות לביטויים / Example Phrases
+**עברית:**
+- "מרגישה שהעור שלך צמא ולא משנה מה את מורחת?"
+- "כנות רגע? גם לי היה ככה"
+- "את לא לבד בתחושה הזאת"
+- "בואי נדבר על משהו שלא מדברים עליו מספיק"
+
+**English equivalent (for reference):**
+- "Feeling like your skin is thirsty no matter what you apply?"
+- "Honesty moment? I felt the same way"
+- "You're not alone in this feeling"
+
+### טון / Tone
+חם, אישי, אמפטי, מרגיע, "בגובה העיניים"
+Warm, personal, empathetic, reassuring, "eye-level"
+
+### מתי להשתמש / When to Use
+- בניית אמון עם קהל חדש
+- התייחסות לבעיה רגישה או אישית
+- יצירת קהילה ותחושת שייכות
+- פוסט ראשון בסדרה (להתחיל עם חיבור)
+
+---
+
+## ARCHETYPE 2: HEAD (הראש - פוסט מומחה)
+## THE EXPERT POST
+
+### מטרה / Purpose
+ביסוס סמכות ואמינות מקצועית.
+Establish authority and credibility.
+
+### מיקוד / Focus
+- מדע מפושט (Simplified science)
+- הוכחות ונתונים (Proof & Data)
+- ערך חינוכי (Educational value)
+- הסבר "איך זה עובד" (How it works)
+
+### טריגרים קוגניטיביים / Cognitive Triggers
+- **סקרנות:** "ידעת שיש מחקר שמראה...?" (Curiosity: "Did you know research shows...?")
+- **למידה:** "הנה למה זה עובד" (Learning: "Here's why it works")
+- **הפתעה:** "אחוז מדהים של נשים לא יודעות ש..." (Surprise)
+- **גילוי:** "תגלית מדעית חדשה מראה..." (Discovery)
+
+### מבנה מומלץ / Recommended Structure
+1. **פתיחה:** עובדה מעניינת או שאלה מדעית (Interesting fact or scientific question)
+2. **גוף:** הסבר פשוט של המדע (Simple science explanation)
+3. **הוכחה:** נתונים, מחקרים, אחוזים (Evidence: data, research, percentages)
+4. **סיום:** CTA מקצועי ומוגדר (Professional, clear CTA)
+
+### דוגמאות לביטויים / Example Phrases
+**עברית:**
+- "המחקר הקליני הוכיח: 92% מהנשים ראו שיפור תוך 4 שבועות"
+- "הסוד של חומצה היאלורונית הוא..."
+- "מה עושה רטינול בעור? בואי אסביר בפשטות"
+- "עם כוח גדול באה אחריות גדולה" (כשמסבירים סיכון/שגרה)
+
+**English equivalent:**
+- "Clinical research proved: 92% of women saw improvement within 4 weeks"
+- "The secret of hyaluronic acid is..."
+- "What does retinol do to skin? Let me explain simply"
+
+### טון / Tone
+מקצועי אך נגיש, סמכותי אך לא מתנשא, חינוכי
+Professional yet accessible, authoritative but not condescending, educational
+
+### מתי להשתמש / When to Use
+- השקת מוצר עם טכנולוגיה חדשה
+- תיקון מיתוסים או מידע שגוי
+- הצגת תוצאות מחקר
+- בניית מומחיות בתחום ספציפי
+
+---
+
+## ARCHETYPE 3: HANDS (הידיים - פוסט מכירתי)
+## THE SALES POST
+
+### מטרה / Purpose
+הנעה לפעולה ומכירה.
+Drive action and sales.
+
+### מיקוד / Focus
+- ההצעה (The Offer)
+- דחיפות וסקרסיטי (Urgency & Scarcity)
+- תועלת ברורה (Clear Benefit)
+- FOMO - Fear of Missing Out
+
+### טריגרים מכירתיים / Sales Triggers
+- **FOMO:** "עצרנו את השעון", "חשבת שפספסת?"
+- **סקרסיטי:** "4 שעות אחרונות", "כמות מוגבלת"
+- **ערך:** "מתנה בשווי ₪300 במתנה"
+- **פשטות:** "רק להיכנס ללינק ולבחור"
+
+### מבנה מומלץ / Recommended Structure
+1. **פתיחה:** הוק מושך תשומת לב (Attention-grabbing hook)
+2. **תועלת:** מה הלקוח מרווח? (What's the benefit?)
+3. **ההצעה:** המבצע/מתנה בפירוט (The offer in detail)
+4. **דחיפות:** למה עכשיו? (Why now?)
+5. **CTA:** ברור, פשוט, ישיר (Clear, simple, direct CTA)
+
+### דוגמאות לביטויים / Example Phrases
+**עברית:**
+- "עצרנו את השעון - המבצע חזר ל-4 שעות בלבד!"
+- "חשבת שפספסת? קיבלת הזדמנות נוספת"
+- "מתנה בשווי ₪280 במתנה על כל הזמנה"
+- "אל תחכי - המלאי מוגבל!"
+- "רק להיכנס, לבחור, ולקבל"
+
+**English equivalent:**
+- "We stopped the clock - sale is back for 4 hours only!"
+- "Thought you missed it? You got another chance"
+- "Gift worth ₪280 with every order"
+
+### טון / Tone
+דחוף אך לא לוחץ, מרגש, מניע, אופטימי
+Urgent but not pushy, exciting, motivating, optimistic
+
+### מתי להשתמש / When to Use
+- מבצעים מוגבלים בזמן
+- השקה של מוצר חדש עם מחיר מבוא
+- סוף שנה/מלאי/עונה
+- הארכת מבצע ל"מהססים האחרונים"
+
+### חובות משפטיות / Legal Requirements
+- ציון תוקף המבצע (תאריך + שעה)
+- ציון "ט.ל.ח" (תנאים לפי חוק)
+- אין הבטחות שווא ("אזל המלאי" רק אם באמת אזל)
+
+---
+
+## כללים משותפים לכל הארכיטיפים
+## Shared Rules Across All Archetypes
+
+### עקרון התרגום Feature-to-Benefit
+**אסור:** "מכיל חומצה היאלורונית"
+**חובה:** "מרווה את העור מיידית ומעניק מראה מלא נפח"
+
+**אסור:** "מכיל תמצית פלנקטון"
+**חובה:** "מגביר פי 3 את מנגנוני הלחות הטבעיים שלך"
+
+### עקרון השימוש בארכיטיפים
+- **לא לערבב:** כל פוסט = ארכיטיפ אחד ברור
+- **רצף אסטרטגי:** התחל ב-Heart, בנה אמון, אחר כך Head לסמכות, ואז Hands למכירה
+- **התאמה לפלטפורמה:** Instagram = יותר Heart/Hands, LinkedIn = יותר Head/Heart
+
+### טיפים מעשיים / Practical Tips
+**Heart:** השתמש בשאלות פתוחות, הזמן לתגובות
+**Head:** השתמש בנתונים ואחוזים, הוסף מקורות
+**Hands:** צור דחיפות אמיתית (לא מלאכותית), היה ברור בהצעה
+
+---
+
+## דוגמאות להרכבה אסטרטגית
+## Examples of Strategic Combinations
+
+### אסטרטגיה 1: השקת מוצר חדש
+1. **שבוע 1:** Heart - "מרגישה שהעור שלך לא מגיב לכלום?"
+2. **שבוע 2:** Head - "המחקר מראה: 87% שיפור בלחות"
+3. **שבוע 3:** Hands - "השקה מיוחדת: מתנה בשווי ₪200"
+
+### אסטרטגיה 2: מבצע בזק
+1. **יום 1:** Hands (דחיפות) - "24 שעות בלבד!"
+2. **יום 2:** Heart (למהססים) - "אני יודעת שזה קשה להחליט..."
+3. **יום 3:** Head (הוכחה) - "למי שעדיין שואלת למה, הנה המחקרים"
+
+### אסטרטגיה 3: בניית קהילה
+1. **כל שבוע:** Heart → Head → Heart (ללא מכירה)
+2. **פעם בחודש:** Hands (רק אחרי שבנית אמון)

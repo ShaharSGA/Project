@@ -22,9 +22,9 @@ if sys.platform == 'win32':
 # Load environment variables
 load_dotenv()
 
-# Import agents and tasks
-from agents.strategy_architect import strategy_architect
-from agents.dana_copywriter import dana_copywriter
+# Import agent factory functions and task creators
+from agents.strategy_architect import create_strategy_architect_agent
+from agents.dana_copywriter import create_dana_copywriter_agent
 from tasks.strategy_tasks import create_strategy_task
 from tasks.copywriting_tasks import create_copywriting_task
 
@@ -223,10 +223,17 @@ Please wait...""")
         'persona': persona
     }
 
-    # Inject TXTSearchTools into existing agents (RAG tools for dynamic search)
+    # Create agents with RAG tools using factory functions
     global TOOLS
-    strategy_architect.tools = [TOOLS["methodology"]]
-    dana_copywriter.tools = [TOOLS["voice_examples"], TOOLS["style_guide"]]
+    strategy_architect = create_strategy_architect_agent(
+        methodology_tool=TOOLS["methodology"]
+    )
+    dana_copywriter = create_dana_copywriter_agent(
+        voice_tool=TOOLS["voice_examples"],
+        style_tool=TOOLS["style_guide"],
+        platform_tool=TOOLS["platform_specs"],
+        archetype_tool=TOOLS["post_archetypes"]
+    )
 
     # Create tasks - agents will use RAG tools to search for relevant information
     strategy_task = create_strategy_task(strategy_architect, inputs)
@@ -289,17 +296,32 @@ Please wait...""")
                     return v
             return "(no output captured)"
 
+        def get_result_payload(res):
+            """Prefer the fields that contain the crew final answer."""
+            for attr in ("raw", "output", "result", "final_answer", "text"):
+                if hasattr(res, attr):
+                    val = getattr(res, attr)
+                    if val:
+                        return val
+            return None
+
         strategy_output = first_non_empty(
             agent_outputs.get(strategy_architect.role, {}).get("output"),
             getattr(strategy_task, "output", None)
         )
+        result_payload = get_result_payload(result)
         copy_output = first_non_empty(
             agent_outputs.get(dana_copywriter.role, {}).get("output"),
-            getattr(copywriting_task, "output", None)
+            getattr(copywriting_task, "output", None),
+            result_payload
         )
 
         # Choose a single final combined output to avoid duplication in the UI
-        final_combined_output = copy_output or getattr(result, "raw", "(no final output captured)")
+        final_combined_output = first_non_empty(
+            result_payload,
+            copy_output,
+            getattr(copywriting_task, "output", None)
+        )
 
         # Save output to MD file
         await save_output_to_file(product, persona, final_combined_output, strategy_output)
