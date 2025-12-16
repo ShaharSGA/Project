@@ -223,8 +223,12 @@ Please wait...""")
         'persona': persona
     }
 
-    # Create agents with RAG tools using factory functions
+    # Ensure tools initialized before agent creation
     global TOOLS
+    if TOOLS is None:
+        await cl.Message(content="❌ Tools are not initialized. Please restart the chat to reinitialize.").send()
+        return
+
     strategy_architect = create_strategy_architect_agent(
         methodology_tool=TOOLS["methodology"]
     )
@@ -310,13 +314,14 @@ Please wait...""")
             getattr(strategy_task, "output", None)
         )
         result_payload = get_result_payload(result)
+
+        # Keep copy_output focused on the copywriting task only
         copy_output = first_non_empty(
             agent_outputs.get(dana_copywriter.role, {}).get("output"),
-            getattr(copywriting_task, "output", None),
-            result_payload
+            getattr(copywriting_task, "output", None)
         )
 
-        # Choose a single final combined output to avoid duplication in the UI
+        # Combined output prefers overall crew payload, then copy, then task output
         final_combined_output = first_non_empty(
             result_payload,
             copy_output,
