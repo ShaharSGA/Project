@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**מערכת AI אוטונומית ליצירת תוכן שיווקי מותאם אישית בעברית**
+**Autonomous AI system for generating personalized Hebrew marketing content**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![CrewAI](https://img.shields.io/badge/CrewAI-Latest-orange.svg)](https://www.crewai.com/)
@@ -10,279 +10,347 @@
 [![RAG](https://img.shields.io/badge/RAG-ChromaDB-red.svg)](https://www.trychroma.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[English](#english) | [עברית](#hebrew)
-
 </div>
 
 ---
 
-## <a name="hebrew"></a>🇮🇱 עברית
+## 📖 Overview
 
-<div dir="rtl">
+**Dana's Brain** is an advanced AI system that generates professional Hebrew marketing content using RAG (Retrieval-Augmented Generation) and Multi-Agent Architecture.
 
-### 📖 תיאור הפרויקט
+The system mimics Dana's unique writing style (Marketing Manager at Lierac Israel) and generates platform-specific content for LinkedIn, Facebook, and Instagram.
 
-**Dana's Brain** היא מערכת AI מתקדמת שמייצרת תוכן שיווקי מקצועי בעברית תוך שימוש ב-RAG (Retrieval-Augmented Generation) ו-Multi-Agent System.
+### 🎯 Key Features
 
-המערכת מחקה את סגנון הכתיבה הייחודי של דנה (מנהלת שיווק ב-Lierac ישראל) ומייצרת תוכן מותאם לכל פלטפורמה: LinkedIn, Facebook ו-Instagram.
+- 🤖 **2 Autonomous AI Agents** working in sequence
+- 📚 **RAG-powered knowledge retrieval** with ChromaDB
+- 📱 **9 ready-to-publish posts** (3 per platform)
+- 🎨 **Interactive Chainlit UI** with dynamic forms
+- 💾 **Auto-save** to Markdown files with timestamps
+- ✨ **4 writing personas** to match different brand voices
 
-</div>
+---
 
-<div dir="rtl">
-
-### ✨ תכונות עיקריות
-
-**🤖 שני סוכני AI אוטונומיים:**
-- Strategy Architect - מנתח את המוצר ויוצר בריף אסטרטגי
-- Dana Copywriter - כותבת תוכן בסגנון של דנה
-
-**📚 RAG (Retrieval-Augmented Generation):**
-- חיפוש סמנטי במסמכי ידע
-- ChromaDB כמסד נתונים ווקטורי
-- OpenAI Embeddings לחיפוש מדויק
-
-**📱 9 פוסטים מוכנים לפרסום:**
-- 3 פוסטים ל-LinkedIn (מקצועי וחם)
-- 3 פוסטים ל-Facebook (אישי וסיפורי)
-- 3 פוסטים ל-Instagram (קצר וקליט)
-
-**🎨 ממשק Chainlit אינטראקטיבי:**
-- טפסים דינמיים להזנת מידע
-- 4 סגנונות פרסונה של דנה
-- שקיפות מלאה בתהליך העבודה
-
-**💾 שמירה אוטומטית:**
-- קבצי Markdown עם כל התוכן
-- תיקיית outputs עם timestamp
-
-</div>
-
-### 🎯 תהליך העבודה
+## 🔄 How It Works
 
 ```
-📝 משתמש מזין מידע (מוצר, יתרונות, קהל יעד, הצעה)
-         ↓
-🎯 Strategy Architect
-         ↓ (חיפוש במתודולוגיה)
-📚 RAG Search - Methodology
-         ↓
-📊 Strategic Brief בעברית
-         ↓
-✍️ Dana Copywriter
-         ↓ (חיפוש בדוגמאות וסגנון)
-📚 RAG Search - Voice & Style  
-         ↓
-📱 9 Posts מותאמים (LinkedIn, Facebook, Instagram)
-         ↓
-💾 שמירה ל-MD + הצגה בUI
+1. User Input
+   ↓
+2. Strategy Architect Agent
+   → Searches methodology knowledge base (RAG)
+   → Creates strategic brief in Hebrew
+   ↓
+3. Dana Copywriter Agent
+   → Searches voice examples & style guide (RAG)
+   → Writes 9 platform-optimized posts
+   ↓
+4. Output
+   → Saved to Markdown file
+   → Displayed in UI
 ```
 
-### 🛠️ טכנולוגיות
+### The Agents
 
-- **Python 3.10+**
-- **CrewAI** - תזמור סוכני AI
-- **Chainlit** - ממשק משתמש אינטראקטיבי
-- **ChromaDB** - מסד נתונים ווקטורי
-- **OpenAI GPT-4o-mini** - מודל LLM
-- **OpenAI text-embedding-3-small** - Embeddings
-- **LangChain** - כלי RAG
+**🎯 Strategy Architect**
+- Analyzes product data
+- Searches Dana's methodology via RAG
+- Creates comprehensive strategic brief
+- Defines hooks, storytelling angles, and platform strategies
 
-### 📦 התקנה
+**✍️ Dana Copywriter**
+- Receives strategic brief as context
+- Searches voice examples and style guide via RAG
+- Writes content matching Dana's authentic voice
+- Generates 3 posts per platform (Emotional, Expert, Sales)
 
-#### 1. שכפל את הפרויקט
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| **Framework** | CrewAI (Multi-Agent Orchestration) |
+| **UI** | Chainlit (Interactive Web Interface) |
+| **LLM** | OpenAI GPT-4o-mini |
+| **Embeddings** | OpenAI text-embedding-3-small |
+| **Vector DB** | ChromaDB |
+| **RAG Tools** | TXTSearchTool from crewai-tools |
+| **Language** | Python 3.10+ |
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+- Python 3.10 or higher
+- OpenAI API key
+- Git
+
+### Setup Steps
+
+**1. Clone the repository**
 ```bash
 git clone https://github.com/YOUR_USERNAME/AI_Final_151225.git
 cd AI_Final_151225
 ```
 
-#### 2. צור סביבה וירטואלית
+**2. Create virtual environment**
 ```bash
 python -m venv venv
+
 # Windows
 venv\Scripts\activate
+
 # Mac/Linux
 source venv/bin/activate
 ```
 
-#### 3. התקן חבילות
+**3. Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-#### 4. הגדר משתני סביבה
-צור קובץ `.env` בתיקיית הפרויקט:
+**4. Configure environment**
+
+Create a `.env` file in the project root:
 ```env
 OPENAI_API_KEY=sk-your-api-key-here
 ```
 
-### 🚀 שימוש
-
-#### הרצת המערכת
+**5. Run the application**
 ```bash
 chainlit run start.py
 ```
 
-הממשק ייפתח בדפדפן ב-`http://localhost:8000`
+The interface will open at `http://localhost:8000`
 
-#### מילוי טופס
-1. **Product Name** - שם המוצר
-2. **Key Benefits** - יתרונות עיקריים
-3. **Target Audience** - קהל יעד
-4. **The Offer** - ההצעה
-5. **Persona** - בחירת סגנון דנה
+---
 
-#### קבלת תוצאות
-- ⏱️ זמן ריצה: 2-3 דקות
-- 📊 פלט: בריף אסטרטגי + 9 פוסטים
-- 💾 הכל נשמר אוטומטית ב-`outputs/`
+## 🚀 Usage
 
-### 📁 מבנה הפרויקט
+### Step 1: Fill the Form
+- **Product Name** - Name of the product/service
+- **Key Benefits** - Main advantages
+- **Target Audience** - Who is this for?
+- **The Offer** - Discount, promotion, or special offer
+- **Persona** - Choose Dana's writing style:
+  - Professional Dana
+  - Friendly Dana
+  - Inspirational Dana
+  - Mentor Dana
+
+### Step 2: Submit
+Send any message (e.g., "Let's start") to activate the agents.
+
+### Step 3: Wait
+The system takes 2-3 minutes to:
+- Search knowledge bases
+- Create strategic brief
+- Generate 9 posts
+
+### Step 4: Review & Use
+- View output in the interface
+- Find saved file in `outputs/` folder
+- Copy posts to social media platforms
+
+---
+
+## 📁 Project Structure
 
 ```
 AI_Final_151225/
-├── agents/                      # הגדרות סוכני AI
-│   ├── strategy_architect.py    # סוכן אסטרטגיה
-│   └── dana_copywriter.py       # סוכן כתיבה
-├── tasks/                       # משימות לסוכנים
-│   ├── strategy_tasks.py        # משימת אסטרטגיה
-│   └── copywriting_tasks.py     # משימת כתיבה
-├── tools/                       # כלי RAG
-│   └── txt_search_tools.py      # TXTSearchTool עם ChromaDB
-├── Data/                        # מסמכי ידע
-│   ├── Dana_Brain_Methodology.txt
-│   ├── Dana_Voice_Examples_Lierac.txt
-│   └── style_guide_customer_Lierac.txt
-├── outputs/                     # פלטים שנוצרו
-├── start.py                     # נקודת כניסה ראשית
-├── chainlit.md                  # הודעת Welcome
-├── requirements.txt             # תלויות
-└── README.md                    # זה!
+├── agents/                          # AI Agent definitions
+│   ├── strategy_architect.py        # Strategy agent
+│   └── dana_copywriter.py           # Copywriter agent
+├── tasks/                           # Agent tasks
+│   ├── strategy_tasks.py            # Strategy task definition
+│   └── copywriting_tasks.py         # Copywriting task definition
+├── tools/                           # RAG tools
+│   └── txt_search_tools.py          # TXTSearchTool with ChromaDB
+├── Data/                            # Knowledge base documents
+│   ├── Dana_Brain_Methodology.txt   # Marketing methodology
+│   ├── Dana_Voice_Examples_Lierac.txt  # Voice examples
+│   └── style_guide_customer_Lierac.txt # Style guide
+├── outputs/                         # Generated content
+├── start.py                         # Main application entry
+├── chainlit.md                      # Welcome message
+├── requirements.txt                 # Python dependencies
+├── .env                             # Environment variables (create this)
+├── .gitignore                       # Git ignore rules
+└── README.md                        # This file
 ```
 
-### 🧪 דוגמאות פלט
+---
 
-#### Strategic Brief (מקוצר)
+## 📊 Output Examples
+
+### Strategic Brief Structure
 ```
-### PART A: THE DEEP DIVE
-- Product Philosophy: למה המוצר הזה קיים?
-- Simplified Science: איך זה עובד?
-- Sensory Experience: איך זה מרגיש?
+PART A: THE DEEP DIVE
+- Product Philosophy
+- Simplified Science
+- Sensory Experience
 
-### PART B: STRATEGIC LENS
-- The Gap: מה חסר ללקוח?
-- Buying Barriers: מה מונע מהם לקנות?
-- Psychological Trigger: איזה רגש מניע?
-...
-```
+PART B: STRATEGIC LENS
+- The Gap
+- Buying Barriers
+- Psychological Trigger
 
-#### פוסט לדוגמה (LinkedIn)
-```
-היי אהובה,
+PART C: CREATIVE TOOLKIT
+- Hooks Bank
+- Storytelling Angles
+- Feature-to-Benefit Table
+- Offer Framing
 
-האם את מרגישה שהעור שלך צמא לתשומת לב?
-
-כולנו חוות רגעים שבהם העור שלנו מרגיש עייף, יבש ולא זוהר...
-
-[150-200 מילים של תוכן מקצועי ואישי]
-
-**CTA:** שתפי אותנו איך את מפנקת את העור שלך?
-**Hashtags:** #טיפוח #עורזוהר
+PART D: PLATFORM STRATEGY
+- LinkedIn recommendations
+- Facebook recommendations
+- Instagram recommendations
 ```
 
-### ⚙️ תצורה מתקדמת
+### Post Format (LinkedIn Example)
+```
+Hey [greeting],
 
-#### שינוי מודל LLM
-ערוך את `agents/strategy_architect.py`:
+[Emotional hook or question]
+
+[Personal story or insight]
+
+[Value proposition]
+
+[Call to action]
+
+**CTA:** [Specific action]
+**Hashtags:** #tag1 #tag2
+```
+
+---
+
+## ⚙️ Configuration
+
+### Change LLM Model
+
+Edit `agents/strategy_architect.py`:
 ```python
-llm=ChatOpenAI(model="gpt-4o", temperature=0.5)
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-4o",  # Change to gpt-4, gpt-4-turbo, etc.
+    temperature=0.5
+)
 ```
 
-#### שינוי Embeddings
-ערוך את `tools/txt_search_tools.py`:
+### Change Embedding Model
+
+Edit `tools/txt_search_tools.py`:
 ```python
 EMBEDDING_CONFIG = {
     "provider": "openai",
     "config": {
-        "model": "text-embedding-3-large",  # שנה כאן
+        "model": "text-embedding-3-large",  # Upgrade for better accuracy
     }
 }
 ```
 
-### 🤝 תרומה לפרויקט
+### Adjust Verbosity
 
-1. Fork את הפרויקט
-2. צור branch חדש (`git checkout -b feature/AmazingFeature`)
-3. Commit את השינויים (`git commit -m 'Add some AmazingFeature'`)
-4. Push ל-Branch (`git push origin feature/AmazingFeature`)
-5. פתח Pull Request
-
-### 📝 רישיון
-
-MIT License - ראה קובץ [LICENSE](LICENSE)
-
-### 👤 יוצר
-
-**Shahar** - [GitHub](https://github.com/YOUR_USERNAME)
-
-### 🙏 תודות
-
-- **Dana** - על המתודולוגיה והסגנון הייחודי
-- **Lierac Israel** - על דוגמאות התוכן
-- **CrewAI Team** - על ה-framework המדהים
-- **Chainlit Team** - על הממשק המעולה
-
-</div>
+Edit `start.py`:
+```python
+crew = Crew(
+    agents=[strategy_architect, dana_copywriter],
+    tasks=[strategy_task, copywriting_task],
+    process=Process.sequential,
+    verbose=True  # Set to False for less logging
+)
+```
 
 ---
 
-## <a name="english"></a>🇬🇧 English
+## 🧪 Testing
 
-### 📖 Project Description
+Run a test campaign:
 
-**Dana's Brain** is an advanced AI system that generates professional Hebrew marketing content using RAG (Retrieval-Augmented Generation) and Multi-Agent System.
+1. **Product:** "Anti-aging face mask - new edition"
+2. **Benefits:** "Deep hydration, instant glow, natural ingredients"
+3. **Audience:** "Women 35-50, interested in skincare"
+4. **Offer:** "15% off + free shipping"
+5. **Persona:** Professional Dana
 
-The system mimics Dana's unique writing style (Marketing Manager at Lierac Israel) and generates platform-specific content for LinkedIn, Facebook, and Instagram.
+Expected output: Strategic brief + 9 posts in ~2-3 minutes
 
-### ✨ Key Features
+---
 
-- 🤖 **2 Autonomous AI Agents**
-- 📚 **RAG with ChromaDB**
-- 📱 **9 Ready-to-Publish Posts**
-- 🎨 **Interactive Chainlit UI**
-- 💾 **Auto-Save to Markdown**
+## 🔍 RAG Implementation
 
-### 🚀 Quick Start
+The system uses **TXTSearchTool** for semantic search:
 
-```bash
-# Clone
-git clone https://github.com/YOUR_USERNAME/AI_Final_151225.git
-cd AI_Final_151225
+1. **Indexing Phase:**
+   - Documents are split into chunks
+   - Each chunk is embedded using OpenAI
+   - Embeddings stored in ChromaDB
 
-# Install
-pip install -r requirements.txt
+2. **Search Phase:**
+   - Agent query is embedded
+   - Similar chunks are retrieved
+   - Relevant context is returned to agent
 
-# Configure
-echo "OPENAI_API_KEY=your-key-here" > .env
+3. **Knowledge Base Files:**
+   - `Dana_Brain_Methodology.txt` - Used by Strategy Architect
+   - `Dana_Voice_Examples_Lierac.txt` - Used by Dana Copywriter
+   - `style_guide_customer_Lierac.txt` - Used by Dana Copywriter
 
-# Run
-chainlit run start.py
-```
+---
 
-### 🛠️ Tech Stack
+## 🤝 Contributing
 
-- Python 3.10+, CrewAI, Chainlit, ChromaDB, OpenAI GPT-4o-mini
+Contributions are welcome! Please:
 
-### 📄 License
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-MIT License
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Dana** - For the unique methodology and writing style
+- **Lierac Israel** - For providing content examples
+- **CrewAI Team** - For the excellent multi-agent framework
+- **Chainlit Team** - For the beautiful UI framework
+- **OpenAI** - For GPT and embedding models
+
+---
+
+## 👤 Author
+
+**Shahar** - [GitHub Profile](https://github.com/YOUR_USERNAME)
+
+---
+
+## 📞 Support
+
+If you encounter issues:
+1. Check the `.env` file has correct API key
+2. Ensure all dependencies are installed
+3. Check `run.log` for error details
+4. Open an issue on GitHub
 
 ---
 
 <div align="center">
 
-**Made with ❤️ and 🤖 by Shahar**
+**Made with ❤️ and 🤖**
+
+⭐ Star this repo if you find it useful!
 
 [⬆ Back to Top](#-danas-brain---ai-marketing-content-generator)
 
 </div>
-
