@@ -2,7 +2,7 @@
 """
 Dana's Brain - Autonomous Marketing AI Agents
 Main Chainlit application with full UI implementation
-Version: 1.0 - RAG Implementation
+Version: 1.1 - Enhanced with thread safety, timeouts, and validation
 """
 
 import sys
@@ -11,8 +11,13 @@ import chainlit as cl
 from chainlit.input_widget import Select, TextInput
 from crewai import Crew, Process
 import os
+import asyncio
+import threading
+import time
 from pathlib import Path
 from dotenv import load_dotenv
+from typing import Optional, Dict
+from pydantic import ValidationError
 
 # Set UTF-8 encoding for Windows console
 if sys.platform == 'win32':
@@ -30,26 +35,47 @@ from tasks.copywriting_tasks import create_copywriting_task
 
 # Import TXTSearchTool initialization
 from tools.txt_search_tools import initialize_all_tools
+
+# Import configuration and models
+from config import ExecutionConfig, ChainlitConfig
+from models import CampaignInput, OutputMetadata
 from datetime import datetime
 
-# Initialize tools ONCE at startup (global state)
-TOOLS = None
+# Initialize tools ONCE at startup (global state) with thread safety
+TOOLS: Optional[Dict] = None
+TOOLS_LOCK = threading.Lock()
 
 
 @cl.on_chat_start
 async def start():
-    """Initialize chat with form inputs and tools"""
+    """Initialize chat with form inputs and tools (thread-safe)"""
     global TOOLS
 
-    # Initialize TXTSearchTools on first run
+    # Initialize TXTSearchTools on first run (with thread safety)
     if TOOLS is None:
-        await cl.Message(content="🔧 Initializing RAG search tools...").send()
-        try:
-            TOOLS = await cl.make_async(initialize_all_tools)()
-            await cl.Message(content="✅ Search tools ready! ChromaDB initialized.").send()
-        except Exception as e:
-            await cl.Message(content=f"❌ Error initializing tools: {str(e)}").send()
-            return
+        with TOOLS_LOCK:
+            # Double-check after acquiring lock
+            if TOOLS is None:
+                await cl.Message(content="🔧 Initializing RAG search tools...").send()
+                try:
+                    TOOLS = await cl.make_async(initialize_all_tools)()
+                    await cl.Message(content="✅ Search tools ready! ChromaDB initialized.").send()
+
+                except FileNotFoundError as e:
+                    await cl.Message(content=str(e)).send()
+                    return
+
+                except UnicodeDecodeError as e:
+                    await cl.Message(content=f"❌ **File Encoding Error**\n\n{e.reason}\n\n**Suggestion:** Save all Data/ files with UTF-8 encoding.").send()
+                    return
+
+                except RuntimeError as e:
+                    await cl.Message(content=str(e)).send()
+                    return
+
+                except Exception as e:
+                    await cl.Message(content=f"❌ **Unexpected Error**\n\n{str(e)}\n\n**Suggestion:** Check logs or restart the application.").send()
+                    return
 
     settings = await cl.ChatSettings([
         TextInput(
@@ -174,35 +200,59 @@ async def save_output_to_file(product, persona, content, strategy):
 
 @cl.on_message
 async def main(message: cl.Message):
-    """Process user request with CrewAI"""
+    """Process user request with CrewAI (with validation and timeout)"""
     settings = cl.user_session.get("settings")
 
-    # Extract and validate inputs
+    # Extract inputs
     product = settings.get("product", "").strip()
     benefits = settings.get("benefits", "").strip()
     audience = settings.get("audience", "").strip()
     offer = settings.get("offer", "").strip()
     persona = settings.get("persona", "Friendly Dana")
 
-    # Validate that all required fields are filled
-    if not all([product, benefits, audience, offer]):
-        await cl.Message(content="""❌ **Error: Missing Data**
+    # Validate inputs with Pydantic
+    try:
+        validated_input = CampaignInput(
+            product=product,
+            benefits=benefits,
+            audience=audience,
+            offer=offer,
+            persona=persona
+        )
+        # Use validated data
+        inputs = validated_input.to_dict()
 
-Please fill in **all fields** in the form above:
-- Product Name / Service
-- Key Benefits
-- Target Audience
-- The Offer
+    except ValidationError as e:
+        # Format validation errors for user
+        error_messages = []
+        for error in e.errors():
+            field = error['loc'][0]
+            msg = error['msg']
+            error_messages.append(f"- **{field}**: {msg}")
 
-Then send another message to activate the system.""").send()
+        await cl.Message(content=f"""❌ **Input Validation Error**
+
+Please fix the following issues:
+
+{chr(10).join(error_messages)}
+
+**Then send another message to continue.**""").send()
+        return
+
+    except Exception as e:
+        await cl.Message(content=f"""❌ **Validation Error**
+
+{str(e)}
+
+Please check all form fields and try again.""").send()
         return
 
     # Show loading message
     msg = cl.Message(content=f"""🔄 **Dana's Team Started Working!**
 
-**Product:** {product}
-**Target Audience:** {audience}
-**Persona:** {persona}
+**Product:** {inputs['product']}
+**Target Audience:** {inputs['audience']}
+**Persona:** {inputs['persona']}
 
 ⏳ This may take 2-3 minutes...
 
@@ -213,15 +263,6 @@ Then send another message to activate the system.""").send()
 
 Please wait...""")
     await msg.send()
-
-    # Prepare inputs for the crew
-    inputs = {
-        'product': product,
-        'benefits': benefits,
-        'audience': audience,
-        'offer': offer,
-        'persona': persona
-    }
 
     # Ensure tools initialized before agent creation
     global TOOLS
@@ -266,8 +307,15 @@ Please wait...""")
             raise Exception(f"Error running crew: {str(e)}")
 
     try:
-        # Run crew asynchronously (CRITICAL: wrap sync function with cl.make_async)
-        result = await cl.make_async(run_crew)()
+        # Run crew asynchronously with timeout (CRITICAL: wrap sync function with cl.make_async)
+        start_time = time.time()
+
+        result = await asyncio.wait_for(
+            cl.make_async(run_crew)(),
+            timeout=ExecutionConfig.CREW_TIMEOUT
+        )
+
+        execution_time = time.time() - start_time
 
         # Extract per-task outputs for transparency
         task_outputs = getattr(result, "tasks_output", []) or []
@@ -329,7 +377,7 @@ Please wait...""")
         )
 
         # Save output to MD file
-        await save_output_to_file(product, persona, final_combined_output, strategy_output)
+        await save_output_to_file(inputs['product'], inputs['persona'], final_combined_output, strategy_output)
 
         # Format and display output with full traceability
         output = f"""# ✅ Project Completed Successfully!
@@ -348,11 +396,12 @@ Please wait...""")
 ---
 
 ## 📑 Data Provided
-- Product: {product}
-- Benefits: {benefits}
-- Audience: {audience}
-- Offer: {offer}
-- Persona: {persona}
+- Product: {inputs['product']}
+- Benefits: {inputs['benefits']}
+- Audience: {inputs['audience']}
+- Offer: {inputs['offer']}
+- Persona: {inputs['persona']}
+- ⏱️ Execution Time: {execution_time:.1f}s
 
 ---
 
@@ -390,7 +439,7 @@ Please wait...""")
 **Role:** Business analysis and strategic brief creation
 
 **What it did:**
-- ✅ Analyzed product "{product}" and target audience
+- ✅ Analyzed product "{inputs['product']}" and target audience
 - ✅ Identified gaps and marketing opportunities
 - ✅ Created comprehensive strategic brief in Hebrew
 - ✅ Defined recommendations for each platform (LinkedIn, Facebook, Instagram)
@@ -406,7 +455,7 @@ Please wait...""")
 **What she did:**
 - ✅ Read and understood the strategic brief
 - ✅ Wrote 9 tailored posts (3 per platform)
-- ✅ Adapted tone to persona: **{persona}**
+- ✅ Adapted tone to persona: **{inputs['persona']}**
 - ✅ Maintained authenticity and Dana's unique voice
 
 **Tools used:**
@@ -426,6 +475,27 @@ Please wait...""")
 💡 **Tip:** You can send another message with different data to get more content!"""
 
         msg.content = output
+        await msg.update()
+
+    except asyncio.TimeoutError:
+        # Timeout-specific error handling
+        error_msg = f"""❌ **Execution Timeout**
+
+Content generation took longer than {ExecutionConfig.CREW_TIMEOUT} seconds and was terminated.
+
+---
+
+## 💡 Possible Causes:
+
+1. **OpenAI API is slow** - Try again in a few moments
+2. **Complex request** - Try simplifying your inputs
+3. **Network issues** - Check your internet connection
+
+---
+
+**Recommendation:** Wait a moment and try again. If the issue persists, the system may be experiencing high load."""
+
+        msg.content = error_msg
         await msg.update()
 
     except Exception as e:
@@ -449,6 +519,8 @@ Please wait...""")
    - Dana_Brain_Methodology.txt
    - Dana_Voice_Examples_Lierac.txt
    - style_guide_customer_Lierac.txt
+   - platform_specifications.txt
+   - post_archetypes.txt
 
 3. **Check internet connection**
 

@@ -1,9 +1,23 @@
-from crewai import Task
+from crewai import Task, Agent
+from typing import Dict, Optional
 
-def create_copywriting_task(agent, inputs, context_task):
+
+def create_copywriting_task(
+    agent: Agent,
+    inputs: Dict[str, str],
+    context_task: Optional[Task] = None
+) -> Task:
     """
     Create a copywriting task that relies entirely on RAG searches.
     The agent must search for platform specs, archetypes, voice examples, and style rules.
+
+    Args:
+        agent: The Dana Copywriter agent
+        inputs: Dictionary containing product, benefits, audience, offer, persona
+        context_task: Strategy task that provides context (Campaign Bible)
+
+    Returns:
+        Task configured for content creation with RAG
     """
     return Task(
         description=f"""

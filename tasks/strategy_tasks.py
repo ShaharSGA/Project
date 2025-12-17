@@ -1,9 +1,18 @@
-from crewai import Task
+from crewai import Task, Agent
+from typing import Dict
 
-def create_strategy_task(agent, inputs):
+
+def create_strategy_task(agent: Agent, inputs: Dict[str, str]) -> Task:
     """
     Create a strategic analysis task that relies entirely on RAG searches.
     The agent must search for methodology and structure - nothing is hardcoded.
+
+    Args:
+        agent: The Strategy Architect agent
+        inputs: Dictionary containing product, benefits, audience, offer, persona
+
+    Returns:
+        Task configured for strategic analysis with RAG
     """
     return Task(
         description=f"""

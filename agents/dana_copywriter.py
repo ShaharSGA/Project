@@ -4,11 +4,19 @@ Creates Hebrew marketing content in Dana's unique voice for social media platfor
 """
 
 from crewai import Agent
+from crewai_tools import TXTSearchTool
 from langchain_openai import ChatOpenAI
+from config import AgentConfig
 
-def create_dana_copywriter_agent(voice_tool, style_tool, platform_tool, archetype_tool):
+
+def create_dana_copywriter_agent(
+    voice_tool: TXTSearchTool,
+    style_tool: TXTSearchTool,
+    platform_tool: TXTSearchTool,
+    archetype_tool: TXTSearchTool
+) -> Agent:
     """
-    Factory function to create Dana Copywriter agent with RAG tools
+    Factory function to create Dana Copywriter agent with RAG tools.
 
     Args:
         voice_tool: TXTSearchTool for Dana's voice examples
@@ -52,7 +60,10 @@ def create_dana_copywriter_agent(voice_tool, style_tool, platform_tool, archetyp
         ''',
 
         tools=[voice_tool, style_tool, platform_tool, archetype_tool],
-        llm=ChatOpenAI(model="gpt-4o-mini", temperature=0.7),
-        verbose=True,
-        allow_delegation=False
+        llm=ChatOpenAI(
+            model=AgentConfig.COPYWRITER_MODEL,
+            temperature=AgentConfig.COPYWRITER_TEMPERATURE
+        ),
+        verbose=AgentConfig.COPYWRITER_VERBOSE,
+        allow_delegation=AgentConfig.ALLOW_DELEGATION
     )
