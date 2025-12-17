@@ -37,7 +37,7 @@ from tasks.copywriting_tasks import create_copywriting_task
 from tools.txt_search_tools import initialize_all_tools
 
 # Import configuration and models
-from config import ExecutionConfig, ChainlitConfig
+from config import ExecutionConfig, ChainlitConfig, AgentConfig
 from models import CampaignInput, OutputMetadata
 from datetime import datetime
 
@@ -56,17 +56,17 @@ async def start():
         with TOOLS_LOCK:
             # Double-check after acquiring lock
             if TOOLS is None:
-                await cl.Message(content="🔧 Initializing RAG search tools...").send()
+                await cl.Message(content="🔧 מאתחל כלי חיפוש במאגר הידע...").send()
                 try:
                     TOOLS = await cl.make_async(initialize_all_tools)()
-                    await cl.Message(content="✅ Search tools ready! ChromaDB initialized.").send()
+                    await cl.Message(content="✅ כלי החיפוש מוכנים! מאגר הידע הופעל בהצלחה.").send()
 
                 except FileNotFoundError as e:
                     await cl.Message(content=str(e)).send()
                     return
 
                 except UnicodeDecodeError as e:
-                    await cl.Message(content=f"❌ **File Encoding Error**\n\n{e.reason}\n\n**Suggestion:** Save all Data/ files with UTF-8 encoding.").send()
+                    await cl.Message(content=f"❌ **שגיאת קידוד קובץ**\n\n{e.reason}\n\n**המלצה:** שמרו את כל קבצי Data/ בקידוד UTF-8.").send()
                     return
 
                 except RuntimeError as e:
@@ -74,40 +74,44 @@ async def start():
                     return
 
                 except Exception as e:
-                    await cl.Message(content=f"❌ **Unexpected Error**\n\n{str(e)}\n\n**Suggestion:** Check logs or restart the application.").send()
+                    await cl.Message(content=f"❌ **שגיאה בלתי צפויה**\n\n{str(e)}\n\n**המלצה:** בדקו את הלוגים או הפעילו מחדש את האפליקציה.").send()
                     return
 
     settings = await cl.ChatSettings([
         TextInput(
             id="product",
-            label="Product Name / Service",
-            placeholder="Example: Lierac Hydragenist Serum"
+            label="Product Name / Service (Max 200 chars)",
+            placeholder="Example: Lierac Hydragenist Serum",
+            description="Product or service name (1-200 characters)"
         ),
         TextInput(
             id="benefits",
-            label="Key Benefits",
-            placeholder="Example: Deep hydration, instant glow, natural ingredients"
+            label="Key Benefits (Max 1000 chars)",
+            placeholder="Example: Deep hydration, instant glow, natural ingredients, clinically tested formula...",
+            description="List the main benefits - be concise but thorough (10-1000 characters)"
         ),
         TextInput(
             id="audience",
-            label="Target Audience",
-            placeholder="Example: Women 35-50, interested in anti-aging"
+            label="Target Audience (Max 500 chars)",
+            placeholder="Example: Women 35-50, interested in anti-aging, skincare enthusiasts",
+            description="Describe your target audience (5-500 characters)"
         ),
         TextInput(
             id="offer",
-            label="The Offer",
-            placeholder="Example: 25% discount + free shipping"
+            label="The Offer (Max 300 chars)",
+            placeholder="Example: 25% discount + free shipping on first order",
+            description="Your promotional offer or call-to-action (1-300 characters)"
         ),
         Select(
             id="persona",
             label="Select Dana Persona",
             values=[
-                "Professional Dana",
-                "Friendly Dana",
-                "Inspirational Dana",
-                "Mentor Dana"
+                "Professional Dana - Professional tone, data-driven, emphasizing benefits and facts, thought leadership style",
+                "Friendly Dana - Warm conversational tone, 'best friend' voice, personal stories, casual yet expert",
+                "Inspirational Dana - Motivational and empowering, aspirational messaging, emotional connection, transformative focus",
+                "Mentor Dana - Guiding and educational tone, supportive advice, teaching approach, nurturing expertise"
             ],
-            initial_value="Friendly Dana"
+            initial_value="Friendly Dana - Warm conversational tone, 'best friend' voice, personal stories, casual yet expert"
         )
     ]).send()
 
@@ -150,9 +154,21 @@ async def update_settings(settings):
     cl.user_session.set("settings", settings)
 
 
-async def save_output_to_file(product, persona, content, strategy):
+def get_temperature_description_hebrew(temp: float) -> str:
+    """Convert temperature value to user-friendly Hebrew description"""
+    if temp <= 0.4:
+        return "נמוכה (ממוקד ומדויק) 🎯"
+    elif temp <= 0.6:
+        return "בינונית (איזון בין דיוק ליצירתיות) ⚖️"
+    elif temp <= 0.7:
+        return "בינונית-גבוהה (יצירתי ומגוון) 🎨"
+    else:
+        return "גבוהה (מאוד יצירתי וחופשי) 🌈"
+
+
+async def save_output_to_file(product, persona, content, strategy, temperature=None, execution_time=None):
     """
-    Save the generated content to a markdown file
+    Save the generated content to a markdown file with comprehensive metadata
     """
     try:
         # Create outputs directory if not exists
@@ -165,37 +181,104 @@ async def save_output_to_file(product, persona, content, strategy):
         filename = f"{timestamp}_{safe_product}_{persona.replace(' ', '_')}.md"
         filepath = output_dir / filename
 
-        # Format markdown content
-        md_content = f"""# Marketing Content Output
+        # Get persona details from config
+        persona_description = ""
+        search_terms_display = ""
+        temperature_display = ""
 
-**Generated:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-**Product:** {product}
-**Persona:** {persona}
+        if temperature is not None:
+            temp_hebrew = get_temperature_description_hebrew(temperature)
+            temperature_display = f"**רמת יצירתיות:** {temp_hebrew} (Temperature: {temperature})\n"
+
+        # Get persona-specific search terms and description from config
+        try:
+            from config import PersonaConfig
+            if persona in PersonaConfig.PERSONA_SEARCH_TERMS:
+                terms = PersonaConfig.PERSONA_SEARCH_TERMS[persona]
+                tone_terms = ', '.join(terms.get('tone', []))
+                style_terms = ', '.join(terms.get('style', []))
+                search_terms_display = f"""**מונחי חיפוש שנעשה שימוש בהם:**
+- **טון (Tone):** {tone_terms}
+- **סגנון (Style):** {style_terms}
+"""
+
+                # Get persona description based on persona name
+                persona_descriptions = {
+                    "Professional Dana": "טון מקצועי וממוקד, דאטה-דריבן, מדגיש תועלות ועובדות, סגנון של מנהיגות מחשבתית (Thought Leadership)",
+                    "Friendly Dana": "טון חברותי ושיחתי, קול של 'חברה הכי טובה', סיפורים אישיים, קז'ואל אבל מקצועי",
+                    "Inspirational Dana": "מוטיבציה והעצמה, מסרים שאפתניים, חיבור רגשי, פוקוס על טרנספורמציה",
+                    "Mentor Dana": "טון מנחה וחינוכי, עצות תומכות, גישה לימודית, מומחיות מטפחת"
+                }
+                persona_description = persona_descriptions.get(persona, "")
+        except:
+            pass
+
+        # Format execution time
+        exec_time_display = ""
+        if execution_time:
+            minutes = int(execution_time // 60)
+            seconds = execution_time % 60
+            if minutes > 0:
+                exec_time_display = f"**זמן ביצוע:** {minutes} דקות ו-{seconds:.1f} שניות ({execution_time:.1f} שניות סה\"כ)\n"
+            else:
+                exec_time_display = f"**זמן ביצוע:** {execution_time:.1f} שניות\n"
+
+        # Format markdown content with enhanced metadata
+        md_content = f"""# תוכן שיווקי - Dana's Brain
+
+**נוצר בתאריך:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**מוצר:** {product}
+**פרסונה:** {persona}
 
 ---
 
-## 🎯 Strategic Brief
+## 📊 מטא-נתונים על הפקת התוכן
+
+{temperature_display}{exec_time_display}**מספר פוסטים שנוצרו:** 9 (3 LinkedIn + 3 Facebook + 3 Instagram)
+**מאגר ידע:** 5 קבצי ידע של דנה (מתודולוגיה, דוגמאות כתיבה, מפרט סגנון, מפרט פלטפורמות, ארכיטייפים)
+
+---
+
+## 🎯 אודות הפרסונה שנבחרה
+
+**{persona}** - {persona_description}
+
+{search_terms_display}
+---
+
+## 🎯 תקציר אסטרטגי (Campaign Bible)
 
 {strategy}
 
 ---
 
-## ✍️ Social Media Posts
+## ✍️ פוסטים למדיה חברתית
 
 {content}
 
 ---
 
-**Generated by Dana's Brain - Chainlit + CrewAI with RAG**
+## 💡 הערות לשימוש
+
+- **העתקה מהירה:** כל פוסט מסומן בפלטפורמה שלו (LinkedIn/Facebook/Instagram)
+- **עריכה:** ניתן לערוך את הפוסטים בהתאם לצרכים ספציפיים
+- **פרסום:** כל פוסט מותאם לפורמט ולטון של הפלטפורמה שלו
+
+---
+
+**🤖 נוצר על ידי Dana's Brain** - מערכת AI לייצור תוכן שיווקי
+מופעל באמצעות Chainlit + CrewAI עם RAG (Retrieval-Augmented Generation)
 """
 
         # Write to file with UTF-8 encoding (for Hebrew)
         filepath.write_text(md_content, encoding='utf-8')
 
-        await cl.Message(content=f"💾 **Output saved to:** `{filepath}`").send()
+        await cl.Message(content=f"💾 **הקובץ נשמר:** `{filepath}`").send()
+        return filename
 
     except Exception as e:
-        await cl.Message(content=f"⚠️ Could not save file: {str(e)}").send()
+        await cl.Message(content=f"⚠️ לא ניתן לשמור את הקובץ: {str(e)}").send()
+        return None
 
 
 @cl.on_message
@@ -208,7 +291,10 @@ async def main(message: cl.Message):
     benefits = settings.get("benefits", "").strip()
     audience = settings.get("audience", "").strip()
     offer = settings.get("offer", "").strip()
-    persona = settings.get("persona", "Friendly Dana")
+    persona_full = settings.get("persona", "Friendly Dana - Warm conversational tone, 'best friend' voice, personal stories, casual yet expert")
+
+    # Extract just the persona name (before the dash)
+    persona = persona_full.split(" - ")[0] if " - " in persona_full else persona_full
 
     # Validate inputs with Pydantic
     try:
@@ -223,12 +309,31 @@ async def main(message: cl.Message):
         inputs = validated_input.to_dict()
 
     except ValidationError as e:
-        # Format validation errors for user
+        # Format validation errors for user with helpful details
         error_messages = []
         for error in e.errors():
             field = error['loc'][0]
             msg = error['msg']
-            error_messages.append(f"- **{field}**: {msg}")
+
+            # Add character count for string length errors
+            if field in ['product', 'benefits', 'audience', 'offer']:
+                current_value = settings.get(field, "")
+                char_count = len(current_value)
+
+                # Character limits
+                limits = {
+                    'product': 200,
+                    'benefits': 1000,
+                    'audience': 500,
+                    'offer': 300
+                }
+
+                if 'at most' in msg or 'at least' in msg:
+                    error_messages.append(f"- **{field}**: {msg}\n  → Current: {char_count} characters (Limit: {limits.get(field, '?')} chars)")
+                else:
+                    error_messages.append(f"- **{field}**: {msg}")
+            else:
+                error_messages.append(f"- **{field}**: {msg}")
 
         await cl.Message(content=f"""❌ **Input Validation Error**
 
@@ -247,37 +352,69 @@ Please fix the following issues:
 Please check all form fields and try again.""").send()
         return
 
-    # Show loading message
-    msg = cl.Message(content=f"""🔄 **Dana's Team Started Working!**
+    # Show loading message with persona details
+    persona_temp = AgentConfig.PERSONA_TEMPERATURES.get(persona, AgentConfig.COPYWRITER_TEMPERATURE)
+    temp_description = get_temperature_description_hebrew(persona_temp)
 
-**Product:** {inputs['product']}
-**Target Audience:** {inputs['audience']}
-**Persona:** {inputs['persona']}
+    msg = cl.Message(content=f"""🔄 **צוות דנה התחיל לעבוד!**
 
-⏳ This may take 2-3 minutes...
+**מוצר:** {inputs['product']}
+**קהל יעד:** {inputs['audience']}
+**פרסונה:** {inputs['persona']}
+**רמת יצירתיות:** {temp_description}
 
-**What's happening now:**
-1. 🎯 The Strategist is searching methodology and analyzing product data
-2. ✍️ Dana is searching voice examples and writing 9 tailored posts
-3. 🎨 Adapting content for each platform with RAG
+⏳ התהליך עשוי לקחת 2-3 דקות...
 
-Please wait...""")
+**מה קורה עכשיו:**
+1. 🎯 האסטרטג מחפש במתודולוגיה ומנתח את נתוני המוצר
+2. 🔍 חיפושי RAG ימצאו דוגמאות רלוונטיות ממאגר הידע של דנה
+3. ✍️ דנה כותבת 9 פוסטים מותאמים בסגנון {inputs['persona']}
+4. 🎨 מתאימה את התוכן לכל פלטפורמה (LinkedIn, Facebook, Instagram)
+
+**שקיפות חיפוש:**
+- חיפוש מתודולוגיה עבור מסגרות אסטרטגיות
+- חיפוש דוגמאות כתיבה עבור טון {inputs['persona']}
+- חיפוש מפרטי פלטפורמה עבור כללי עיצוב
+- חיפוש ארכיטייפים עבור מבני Heart/Head/Hands
+
+אנא המתינו...""")
     await msg.send()
+
+    # Send search transparency update
+    await cl.Message(content="""🔍 **פעילות חיפוש דינמית:**
+
+הסוכנים מחפשים כעת באופן דינמי ב:
+- 📚 Dana_Brain_Methodology.txt (12KB - מסגרות אסטרטגיות)
+- 📚 Dana_Voice_Examples_Lierac.txt (27KB - דוגמאות כתיבה)
+- 📚 style_guide_customer_Lierac.txt (6KB - כללי עיצוב)
+- 📚 platform_specifications.txt (6KB - מפרטי LinkedIn/FB/IG)
+- 📚 post_archetypes.txt (9KB - מסגרת Heart/Head/Hands)
+
+זהו RAG (Retrieval-Augmented Generation) בפעולה - ללא הנחיות קבועות, רק חיפושים דינמיים!""").send()
 
     # Ensure tools initialized before agent creation
     global TOOLS
     if TOOLS is None:
-        await cl.Message(content="❌ Tools are not initialized. Please restart the chat to reinitialize.").send()
+        await cl.Message(content="❌ הכלים לא אותחלו. אנא הפעילו מחדש את הצ'אט.").send()
         return
 
     strategy_architect = create_strategy_architect_agent(
         methodology_tool=TOOLS["methodology"]
     )
+
+    # Get persona-specific temperature
+    persona_temp = AgentConfig.PERSONA_TEMPERATURES.get(
+        persona,
+        AgentConfig.COPYWRITER_TEMPERATURE
+    )
+
     dana_copywriter = create_dana_copywriter_agent(
         voice_tool=TOOLS["voice_examples"],
         style_tool=TOOLS["style_guide"],
         platform_tool=TOOLS["platform_specs"],
-        archetype_tool=TOOLS["post_archetypes"]
+        archetype_tool=TOOLS["post_archetypes"],
+        temperature=persona_temp,
+        persona=persona
     )
 
     # Create tasks - agents will use RAG tools to search for relevant information
@@ -376,124 +513,107 @@ Please wait...""")
             getattr(copywriting_task, "output", None)
         )
 
-        # Save output to MD file
-        await save_output_to_file(inputs['product'], inputs['persona'], final_combined_output, strategy_output)
+        # Save output to MD file with metadata
+        filename = await save_output_to_file(
+            inputs['product'],
+            inputs['persona'],
+            final_combined_output,
+            strategy_output,
+            temperature=persona_temp,
+            execution_time=execution_time
+        )
 
-        # Format and display output with full traceability
-        output = f"""# ✅ Project Completed Successfully!
+        # Quick success confirmation message
+        temp_hebrew = get_temperature_description_hebrew(persona_temp)
+        await cl.Message(content=f"""✅ **הצלחה! התוכן הושלם בהצלחה**
+
+📝 **נוצרו 9 פוסטים:**
+- 3 פוסטים LinkedIn (מקצועי וממוקד)
+- 3 פוסטים Facebook (אישי ומעניין)
+- 3 פוסטים Instagram (קצר ותמציתי)
+
+🎨 **פרסונה:** {inputs['persona']}
+🌡️ **רמת יצירתיות:** {temp_hebrew}
+
+💾 **הקובץ נשמר:** `{filename if filename else 'outputs/[filename].md'}`
+⏱️ **זמן ביצוע:** {execution_time:.1f} שניות
 
 ---
 
-## 🧾 Final Combined Output
+**⬇️ מטה תמצאו את הפרטים המלאים**""").send()
+
+        # Simplified output display with full content in MD file
+        output = f"""# 📄 תוכן מלא
+
+## ✍️ תוכן סופי - 9 פוסטים
 {final_combined_output}
 
 ---
 
-## 🔍 What Happened (Step-by-Step)
-- Strategy task executed by **{strategy_architect.role}**
-- Copywriting task executed by **{dana_copywriter.role}** (using strategy output as context)
+## 🎯 תקציר אסטרטגי
+{strategy_output[:500]}...
+
+*[התקציר המלא נמצא בקובץ MD]*
 
 ---
 
-## 📑 Data Provided
-- Product: {inputs['product']}
-- Benefits: {inputs['benefits']}
-- Audience: {inputs['audience']}
-- Offer: {inputs['offer']}
-- Persona: {inputs['persona']}
-- ⏱️ Execution Time: {execution_time:.1f}s
+## 📊 סיכום ביצוע
+
+**מוצר:** {inputs['product']}
+**פרסונה:** {inputs['persona']}
+**זמן ביצוע:** {execution_time:.1f} שניות
+
+**מה קרה:**
+1. ✅ האסטרטג ניתח את המוצר ויצר תקציר אסטרטגי
+2. ✅ דנה כתבה 9 פוסטים מותאמים (3 LinkedIn, 3 Facebook, 3 Instagram)
+3. ✅ כל פוסט הותאם לפלטפורמה ולטון המבוקש
+
+**כלים שנעשה בהם שימוש:**
+- 📚 מתודולוגיה של דנה
+- 📚 דוגמאות כתיבה
+- 📚 מפרט סגנון
+- 📚 מפרטי פלטפורמות
+- 📚 ארכיטייפים (Heart/Head/Hands)
 
 ---
 
-## 🧭 Task Prompts (for fine-tuning)
-### Strategy Task Prompt
-{strategy_task.description}
+## 💡 שימוש בתוכן
 
-**Expected output format:**  
-{strategy_task.expected_output}
+**קובץ MD מלא:** `{filename if filename else 'outputs/[filename].md'}`
+הקובץ כולל את כל הפרטים הטכניים, מטא-נתונים, והסבר מפורט על הפרסונה.
 
 ---
 
-### Copywriting Task Prompt
-{copywriting_task.description}
+## 🎉 סיימנו! התוכן מוכן לשימוש
 
-**Expected output format:**  
-{copywriting_task.expected_output}
+**מה לעשות עכשיו:**
+1. עברו על התוכן למעלה ↑
+2. העתיקו את הפוסטים שאתם אוהבים
+3. פרסמו בפלטפורמות הרלוונטיות
+4. **בדקו את קובץ MD השמור בתיקיית outputs/**
 
----
-
-## 🗂️ Agent Outputs
-### 🎯 {strategy_architect.role}
-{strategy_output}
-
----
-
-### ✍️ {dana_copywriter.role}
-{"(see Final Combined Output above)" if str(copy_output).strip() == str(final_combined_output).strip() else copy_output}
-
----
-
-## 📊 Agent Workflow
-
-### 🎯 Strategy Architect
-**Role:** Business analysis and strategic brief creation
-
-**What it did:**
-- ✅ Analyzed product "{inputs['product']}" and target audience
-- ✅ Identified gaps and marketing opportunities
-- ✅ Created comprehensive strategic brief in Hebrew
-- ✅ Defined recommendations for each platform (LinkedIn, Facebook, Instagram)
-
-**Tools used:**
-- 📚 Dana_Brain_Methodology.txt
-
----
-
-### ✍️ Dana (The Copywriter)
-**Role:** Marketing content creation in Dana's voice
-
-**What she did:**
-- ✅ Read and understood the strategic brief
-- ✅ Wrote 9 tailored posts (3 per platform)
-- ✅ Adapted tone to persona: **{inputs['persona']}**
-- ✅ Maintained authenticity and Dana's unique voice
-
-**Tools used:**
-- 📚 Dana_Voice_Examples_Lierac.txt
-- 📚 style_guide_customer_Lierac.txt
-
----
-
-## 🎉 Done! Content Ready to Use
-
-**What to do now?**
-1. Review the content above ↑
-2. Copy the posts you like
-3. Publish on relevant platforms
-4. **Check the saved MD file in outputs/ folder!**
-
-💡 **Tip:** You can send another message with different data to get more content!"""
+💡 **טיפ:** שלחו הודעה נוספת עם נתונים שונים כדי לקבל עוד תוכן!"""
 
         msg.content = output
         await msg.update()
 
     except asyncio.TimeoutError:
         # Timeout-specific error handling
-        error_msg = f"""❌ **Execution Timeout**
+        error_msg = f"""❌ **תם הזמן המוקצב**
 
-Content generation took longer than {ExecutionConfig.CREW_TIMEOUT} seconds and was terminated.
-
----
-
-## 💡 Possible Causes:
-
-1. **OpenAI API is slow** - Try again in a few moments
-2. **Complex request** - Try simplifying your inputs
-3. **Network issues** - Check your internet connection
+ייצור התוכן ארך יותר מ-{ExecutionConfig.CREW_TIMEOUT} שניות והופסק.
 
 ---
 
-**Recommendation:** Wait a moment and try again. If the issue persists, the system may be experiencing high load."""
+## 💡 סיבות אפשריות:
+
+1. **API של OpenAI איטי** - נסו שוב בעוד כמה רגעים
+2. **בקשה מורכבת** - נסו לפשט את הקלט
+3. **בעיות רשת** - בדקו את חיבור האינטרנט
+
+---
+
+**המלצה:** המתינו רגע ונסו שוב. אם הבעיה נמשכת, ייתכן שהמערכת חווה עומס גבוה."""
 
         msg.content = error_msg
         await msg.update()

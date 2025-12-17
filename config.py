@@ -205,8 +205,8 @@ def get_embedding_config() -> dict:
     return {
         "provider": EmbeddingConfig.PROVIDER,
         "config": {
-            "model": EmbeddingConfig.MODEL,
-            "dimensions": EmbeddingConfig.DIMENSIONS
+            "model": EmbeddingConfig.MODEL
+            # Note: dimensions are auto-detected by the embedding model
         }
     }
 
@@ -244,7 +244,7 @@ def get_vectordb_config(collection_name: str) -> dict:
     return {
         "provider": EmbeddingConfig.CHROMADB_PROVIDER,
         "config": {
-            "collection_name": collection_name,
-            "persist_directory": EmbeddingConfig.CHROMADB_PERSIST_DIR
+            "collection_name": collection_name
+            # Note: persist_directory is handled by TXTSearchTool internally
         }
     }

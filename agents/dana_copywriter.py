@@ -13,7 +13,9 @@ def create_dana_copywriter_agent(
     voice_tool: TXTSearchTool,
     style_tool: TXTSearchTool,
     platform_tool: TXTSearchTool,
-    archetype_tool: TXTSearchTool
+    archetype_tool: TXTSearchTool,
+    temperature: float = None,
+    persona: str = None
 ) -> Agent:
     """
     Factory function to create Dana Copywriter agent with RAG tools.
@@ -23,14 +25,32 @@ def create_dana_copywriter_agent(
         style_tool: TXTSearchTool for style guide and writing rules
         platform_tool: TXTSearchTool for platform specifications
         archetype_tool: TXTSearchTool for post archetype definitions
+        temperature: Optional temperature override (persona-specific)
+        persona: Optional persona name for customized behavior
 
     Returns:
         Agent configured with all necessary search tools
     """
+    # Use provided temperature or default
+    agent_temp = temperature if temperature is not None else AgentConfig.COPYWRITER_TEMPERATURE
+
+    # Persona-specific search guidance
+    persona_search_guidance = ""
+    if persona:
+        from config import PersonaConfig
+        if persona in PersonaConfig.PERSONA_SEARCH_TERMS:
+            terms = PersonaConfig.PERSONA_SEARCH_TERMS[persona]
+            persona_search_guidance = f"""
+
+        PERSONA-SPECIFIC GUIDANCE for {persona}:
+        - Search for tone: {', '.join(terms['tone'])}
+        - Search for style: {', '.join(terms['style'])}
+        - Adapt your writing to match the {persona} characteristics
+        """
     return Agent(
         role='Senior Copywriter (Dana\'s Cognitive Clone)',
         goal='Create 9 distinct social media posts (3 per platform: LinkedIn, Facebook, Instagram) in Hebrew based on the Campaign Bible.',
-        backstory='''You are the cognitive clone of Dana - a master copywriter who creates content that sounds like a "Best Friend" with "Expert" authority.
+        backstory=f'''You are the cognitive clone of Dana - a master copywriter who creates content that sounds like a "Best Friend" with "Expert" authority.
 
         CRITICAL WORKING METHOD - EXTENSIVE TOOL USAGE REQUIRED:
 
@@ -49,6 +69,7 @@ def create_dana_copywriter_agent(
            d. SEARCH writing rules (e.g., "אימוג'ים" or "מילים אסורות")
         Step 3: ONLY THEN write the post using what you found
         Step 4: Repeat for all 9 posts (3 platforms × 3 archetypes)
+        {persona_search_guidance}
 
         Your Iron-Clad Principles:
         1. NEVER invent facts - only use strategy from Campaign Bible
@@ -62,7 +83,7 @@ def create_dana_copywriter_agent(
         tools=[voice_tool, style_tool, platform_tool, archetype_tool],
         llm=ChatOpenAI(
             model=AgentConfig.COPYWRITER_MODEL,
-            temperature=AgentConfig.COPYWRITER_TEMPERATURE
+            temperature=agent_temp
         ),
         verbose=AgentConfig.COPYWRITER_VERBOSE,
         allow_delegation=AgentConfig.ALLOW_DELEGATION
