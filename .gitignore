@@ -39,11 +39,13 @@ ENV/
 .env.local
 .env.*.local
 
-# ChromaDB
-.chromadb/
+# ChromaDB - Committed for Streamlit Cloud performance
+# .chromadb/ is now tracked in git for faster cloud deployment
+# Exclude other db files but allow ChromaDB
 *.db
+!.chromadb/**/*.db
 *.sqlite
-*.sqlite3
+!.chromadb/**/*.sqlite*
 
 # Logs
 *.log

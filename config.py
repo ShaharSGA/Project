@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).parent
 if is_streamlit_cloud():
     DATA_DIR = BASE_DIR / "Data"  # Data files are committed to git, so they're accessible
     OUTPUT_DIR = Path("/tmp/outputs")  # Ephemeral storage on cloud
-    CHROMADB_DIR = Path("/tmp/.chromadb")  # Ephemeral vector DB
+    CHROMADB_DIR = BASE_DIR / ".chromadb"  # Use pre-built ChromaDB from git (committed for performance)
 else:
     DATA_DIR = BASE_DIR / "Data"
     OUTPUT_DIR = BASE_DIR / "outputs"
