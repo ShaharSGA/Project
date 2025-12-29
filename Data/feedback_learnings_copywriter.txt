@@ -1,0 +1,116 @@
+# Feedback Learnings - Copywriter Agents
+# Last Updated: 2025-12-29 10:23:36
+# Total Patterns: 37 (LinkedIn: 21, Facebook: 8, Instagram: 4)
+# Source: Automated aggregation from feedback.db
+
+---
+
+## 🔥 EXECUTIVE SUMMARY - Critical Rules (Dana's Top Complaints)
+
+### LinkedIn - B2B Targeting Rule (MANDATORY)
+**Problem:** Posts repeatedly target B2C (individual consumers) instead of B2B (business buyers)
+
+**Dana's Feedback:**
+- "הקריאה בסוף לפעולה צריכה להיות מכוונת למנהלים בארגונים או חברות לטובת העובדים שלהם ולא לאדם פרטי" (rating: 2)
+- "כל הפניות בלינקדאין צריכים להיות לקבל של מנהלים בארגון או חברה שמכוונים לפעילות החברה. קנייה מרוכזת, הזמנה להיכרות, מבצע ממוקד, או משהו בסגנון" (rating: 2)
+
+**Fix:**
+- Target audience = HR managers, procurement teams, pharmacy chains, corporate wellness managers
+- Tone = Formal, professional, business-focused
+- Language = "גורמים בארגונים", "מנהלי רכש", "צוותי משאבי אנוש"
+- AVOID = "אהובים ואהובות", "חברות יקרות" (too casual for B2B)
+- Value prop = Organizational benefits (ROI, bulk pricing, employee wellness)
+
+### Facebook/Instagram - Corporate Voice (NOT Personal Blogger)
+**Problem:** Posts sound like a personal blogger, not a large company
+
+**Dana's Feedback:**
+- "אני לא רוצה בכלל שיהיו סיפורים בגוף ראשון כי מדובר על פרסום של חברה גדולה ולא בלוגרית. המקף הארוך לא מתאים ותימנע ממנו באופן גורף. ההנעה לפעולה לשיתוף לא מץתאימה אלא להיכנס לאתר ליראק ולרכוש שם" (rating: 1)
+- "אני לא רוצה בכלל שיהיו סיפורים בגוף ראשון כי מדובר על פרסום של חברה גדולה ולא קוסמטיקאית. המקף הארוך לא מתאים ותימנע ממנו באופן גורףהטון מקצועי רהוט וטוב" (rating: 1)
+
+**Fix:**
+- Use first-person plural (אנחנו, ליראק) NOT first-person singular (אני)
+- Company voice, not personal story
+- Professional yet warm (not overly casual)
+
+### All Platforms - Avoid Overly Salesy Opening
+**Dana's Feedback:**
+- "הפוסט מאוד גנרי, יש שם טון אישי ולא מדבר כחברה גדולה, אין ניסוח שיווקי שממש מסקרן ואין ערך אמיתי שהקוראת מקבלת אני רוצה הוקים הרבה יותר מסקרנים, שאם יש סיפור שישמע אמין ולא כללי אלא ממש ספציפי לדוגמה" (rating: 1)
+- "הפסוט קצר מדי וההצעה שיווקית מדי. היא צריכה לגעת ברגש של הקונה ולגרום להבין שזה המוצר הכי טוב בעולם נגד קמטים" (rating: 1)
+
+**Fix:**
+- Start with value/insight/hook
+- Move offer to bottom
+- Don't lead with discount/sale
+
+---
+
+## LinkedIn Learnings
+
+### AVOID Patterns (Negative Feedback - Rating 1-2)
+
+- [Words] אסור לנקוב מחיר שהוא לא בשקלים. (confidence: 0.79, rating: 2, persona: Professional Dana)
+- [Platform_Fit] הקריאה בסוף לפעולה צריכה להיות מכוונת למנהלים בארגונים או חברות לטובת העובדים שלהם ולא לאדם פרטי (confidence: 0.79, rating: 2, persona: Professional Dana)
+- [Platform_Fit] כל הפניות בלינקדאין צריכים להיות לקבל של מנהלים בארגון או חברה שמכוונים לפעילות החברה. קנייה מרוכזת, הזמנה להיכרות, מבצע ממוקד, או משהו בסגנון (confidence: 0.88, rating: 2, persona: Professional Dana)
+- [Platform_Fit] אני חושב שחלק מהפניה ללינקדאין היא פנייה לארגונים וחברות שמעוניינים לצ'פר את העובדים שלהם. לפחות חלק מהפוסטים צריכים להיות מכוונים לשם. (confidence: 0.79, rating: 2, persona: Professional Dana)
+- [Tone] כמו שכתבתי, לינקדאין זה יותר רשת מקצועית.
+הייתי מצפה לראות פוסט שפונה אם כבר לאנשים בארגונים שיקנו לעובדים שלהם
+אני חושב שזה פחות מתאים פה. (confidence: 0.79, rating: 2, persona: Friendly Dana)
+- [Strategic Miss / DNA Mismatch] הלינקדאין זה מקום שמתקשר בין עסקים או בין בעלי מקצוע ולא לאנשים פרטיים ולכן פנייה לגוף שני לא מתאימה. צריכה להיות פנייה אם כבר לאדם משפיע בארגון לדוגמא לרכישה מרוכזת או "פנק את העובדים שלך", "עזור לנו לגייס את החברה שלך ל...". דברים שקשורים לעסקים (confidence: 0.82, rating: 1, persona: Friendly Dana)
+- [Strategic Miss / DNA Mismatch] הלינקדאין זה מקום שמתקשר בין עסקים או בין בעלי מקצוע ולא לאנשים פרטיים ולכן פנייה לגוף שני לא מתאימה. צריכה להיות פנייה אם כבר לאדם משפיע בארגון לדוגמא לרכישה מרוכזת או "פנק את העובדים שלך", "עזור לנו לגייס את החברה שלך ל...". דברים שקשורים לעסקים (confidence: 0.66, rating: 1, persona: Friendly Dana)
+- [Strategic Miss / DNA Mismatch] הלינקדאין זה מקום שמתקשר בין עסקים או בין בעלי מקצוע ולא לאנשים פרטיים ולכן פנייה לגוף שני לא מתאימה. צריכה להיות פנייה אם כבר לאדם משפיע בארגון לדוגמא לרכישה מרוכזת או "פנק את העובדים שלך", "עזור לנו לגייס את החברה שלך ל...". דברים שקשורים לעסקים (confidence: 0.66, rating: 1, persona: Friendly Dana)
+- [Strategic Miss / DNA Mismatch] באופן כללי בלינקדאין הפנייה היא לא אישית כמו ברשתות אחרות. זו רשת מקצועית ולכן פונה לחלק המקצועי של האדם כלומר אם ברשתות אחרות פונים ללקוחות ישירות B2C,
+כאן פונים לעסקים אחרים - לדוגמא מנהלות משאבי אנוש שתרכוש מארזית, מנהלים שיעשו פעילות או משהו בסגנון. סגנון B2B (confidence: 0.79, rating: 1, persona: Professional Dana)
+- [Tone] פוסטים של לינקדאין ממוקדים למנהלים ואנשים בתפקידים בכירים. הפנייה צריכה להיות רשמית יחסית ומכובדת - אהובים ואהובות או משהו בסגנון ממש לא מתאים. (confidence: 0.72, rating: 1, persona: Friendly Dana)
+- [Other] הפוסט מאוד גנרי, יש שם טון אישי ולא מדבר כחברה גדולה, אין ניסוח שיווקי שממש מסקרן ואין ערך אמיתי שהקוראת מקבלת אני רוצה הוקים הרבה יותר מסקרנים, שאם יש סיפור שישמע אמין ולא כללי אלא ממש ספציפי לדוגמה (confidence: 0.73, rating: 1, persona: Inspirational Dana)
+
+### APPLY Patterns (Positive Feedback - Rating 4-5)
+
+- [Tone] מצוין, אמין, מסקרן, נותן ערך לקוראת, מביא נתונים מדעיים. (confidence: 0.54, rating: 5, persona: Inspirational Dana)
+- [Tone] מצוין - הטון מדויק (confidence: 0.85, rating: 5, persona: Professional Dana)
+- [Other] האורך מושלם, הדגשת את היתרונות באופן מאוד זורם ואמין (confidence: 0.57, rating: 5, persona: Friendly Dana)
+- [Platform_Fit] זה פוסט מעולה, יותר מתאים לפייסבוק או אינסטגרם, לינקדאין אמור לפנות לרכישה מרוכזת של בתי מרקחת וכו'. או מנהלת מש"א בחברה גדולה (confidence: 0.66, rating: 5, persona: Friendly Dana)
+- [Words] הפתיחה שיווקית מדי, ממש "בפנים" ואת ההצעה הייתי מעבירה למקום נמוך יותר בפוסט (confidence: 0.88, rating: 4, persona: Inspirational Dana)
+
+---
+
+## Facebook Learnings
+
+### AVOID Patterns (Negative Feedback - Rating 1-2)
+
+- [Words] המכירות בשקלים ולא ביורו למרות שמהאתר זה מגיע ככה. בבקשה אל תכתוב יותר מחיר ביורו או במטבע אחר שהוא לא שקלים. (confidence: 0.67, rating: 2, persona: Professional Dana)
+- [Tone] הסיפור לא אמין, לא הייתי משתמשת בנתון סטטיסטי בסיפור אישי. וגם זה פושט לחברה ולא אמור לייצג מישהי ספציפית בחברה (confidence: 0.70, rating: 1, persona: Inspirational Dana)
+- [Tone] הפסוט קצר מדי וההצעה שיווקית מדי. היא צריכה לגעת ברגש של הקונה ולגרום להבין שזה המוצר הכי טוב בעולם נגד קמטים (confidence: 0.75, rating: 1, persona: Inspirational Dana)
+- [Tone] הפסוט קצר מדי וההצעה שיווקית מדי. היא צריכה לגעת ברגש של הקונה ולגרום להבין שזה המוצר הכי טוב בעולם נגד קמטים (confidence: 0.91, rating: 1, persona: Inspirational Dana)
+- [Words] אני לא רוצה בכלל שיהיו סיפורים בגוף ראשון כי מדובר על פרסום של חברה גדולה ולא בלוגרית. המקף הארוך לא מתאים ותימנע ממנו באופן גורף. ההנעה לפעולה לשיתוף לא מץתאימה אלא להיכנס לאתר ליראק ולרכוש שם (confidence: 0.75, rating: 1, persona: Friendly Dana)
+- [Structure] אני לא רוצה בכלל שיהיו סיפורים בגוף ראשון כי מדובר על פרסום של חברה גדולה ולא קוסמטיקאית. המקף הארוך לא מתאים ותימנע ממנו באופן גורףהטון מקצועי רהוט וטוב (confidence: 1.00, rating: 1, persona: Friendly Dana)
+- [Structure] מתאים פה יותר גוף ראשון רבות  כי מדובר על פרסום של חברה גדולה ולא בלוגרית. זוג החיצים הכפולים לא מתאים ותימנע ממנו באופן גורף. ההנעה לפעולה לשיתוף לא מץתאימה אלא להיכנס לאתר ליראק ולרכוש שם את ההנעה השיווקית לכתוב בסוף ולא בראש הפוסט (confidence: 0.82, rating: 1, persona: Friendly Dana)
+
+### APPLY Patterns (Positive Feedback - Rating 4-5)
+
+- [Words] לא לכתוב בואו נשתף ידע, אלא בואו לשמוע על התגלית של ליראק (confidence: 0.51, rating: 4, persona: Inspirational Dana)
+
+---
+
+## Instagram Learnings
+
+### AVOID Patterns (Negative Feedback - Rating 1-2)
+
+- [Words] הנעהנ לפעולה לא מדוייקת: לא שתפי אלאל לינק בביו, והניסוח של הפתיחה לא טוב. צריכה להיות נגיעה בכאב: נמאס לך לסבול מעור יבש ומגרד בחורף? (confidence: 0.63, rating: 1, persona: Friendly Dana)
+- [Tone] שיווקי מדי ולא אמין (confidence: 0.60, rating: 1, persona: Friendly Dana)
+
+### APPLY Patterns (Positive Feedback - Rating 4-5)
+
+- [Platform_Fit] הטון החברי ממש יפה, ובשילוב עם התועלות של המוצר זה מתקבל מעולה (confidence: 0.79, rating: 5, persona: Friendly Dana)
+- [Words] לכתוב את ולא אתה, שאר פוסט מעולה (confidence: 0.67, rating: 4, persona: Inspirational Dana)
+
+---
+
+## Summary Statistics
+
+Total Feedback Patterns: 37
+- LinkedIn: 21 patterns (11 avoid, 5 apply)
+- Facebook: 8 patterns (7 avoid, 1 apply)
+- Instagram: 4 patterns (2 avoid, 2 apply)
+
+Last aggregation: 2025-12-29 10:23:36
