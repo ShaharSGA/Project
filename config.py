@@ -77,7 +77,7 @@ class EmbeddingConfig:
     PROVIDER = "openai"
 
     # ChromaDB configuration
-    CHROMADB_PROVIDER = "chroma"
+    CHROMADB_PROVIDER = "chromadb"
     CHROMADB_PERSIST_DIR = str(CHROMADB_DIR)
 
     # Collection names
