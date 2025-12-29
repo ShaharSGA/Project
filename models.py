@@ -215,3 +215,90 @@ class ValidationError(BaseModel):
         if self.value:
             msg += f" (received: '{self.value[:50]}...')" if len(self.value) > 50 else f" (received: '{self.value}')"
         return msg
+
+
+class WebScrapingInput(BaseModel):
+    """Input for web scraping operation."""
+
+    url: str = Field(
+        ...,
+        min_length=10,
+        description="URL to scrape"
+    )
+
+    @validator('url')
+    def validate_url(cls, v: str) -> str:
+        """Ensure URL is valid and has proper protocol."""
+        import re
+
+        url = v.strip()
+
+        # Add https:// if no protocol specified
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+
+        # Basic URL validation
+        url_pattern = re.compile(
+            r'^https?://'
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'
+            r'localhost|'
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
+            r'(?::\d+)?'
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+        if not url_pattern.match(url):
+            raise ValueError('כתובת URL לא תקינה. ודא שהכתובת מתחילה ב-http:// או https://')
+
+        return url
+
+
+class WebScrapingResult(BaseModel):
+    """Result from web scraping operation."""
+
+    success: bool = Field(..., description="Whether scraping succeeded")
+    url: str = Field(..., description="URL that was scraped")
+
+    # Extracted fields (optional)
+    product: Optional[str] = Field(None, description="Extracted product name")
+    benefits: Optional[str] = Field(None, description="Extracted benefits")
+    audience: Optional[str] = Field(None, description="Extracted target audience")
+    offer: Optional[str] = Field(None, description="Extracted offer")
+
+    # Metadata
+    error_message: Optional[str] = Field(None, description="Error message if failed")
+    extraction_confidence: Optional[float] = Field(None, description="Confidence score 0-1")
+    detected_language: Optional[str] = Field(None, description="Detected language")
+
+    def get_filled_fields(self) -> list[str]:
+        """Get list of fields that were successfully extracted."""
+        filled = []
+        for field in ['product', 'benefits', 'audience', 'offer']:
+            value = getattr(self, field)
+            if value and value.strip():
+                filled.append(field)
+        return filled
+
+    def get_empty_fields(self) -> list[str]:
+        """Get list of fields that were NOT extracted."""
+        empty = []
+        for field in ['product', 'benefits', 'audience', 'offer']:
+            value = getattr(self, field)
+            if not value or not value.strip():
+                empty.append(field)
+        return empty
+
+    def format_warning_message(self) -> str:
+        """Format warning message for empty fields in Hebrew."""
+        empty = self.get_empty_fields()
+        if not empty:
+            return ""
+
+        field_names_hebrew = {
+            'product': 'שם מוצר',
+            'benefits': 'יתרונות',
+            'audience': 'קהל יעד',
+            'offer': 'הצעה'
+        }
+
+        missing_names = [field_names_hebrew.get(f, f) for f in empty]
+        return f"⚠️ השדות הבאים לא נמצאו באתר: {', '.join(missing_names)}"
