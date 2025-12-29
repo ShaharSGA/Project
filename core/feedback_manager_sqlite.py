@@ -185,6 +185,10 @@ def save_feedback(
     metadata_json = json.dumps(metadata, ensure_ascii=False)
     refinement_data_json = json.dumps(refinement_data, ensure_ascii=False) if refinement_data else None
 
+    # Get current timestamp for created_at
+    from datetime import datetime
+    created_at = datetime.now().isoformat()
+
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -194,13 +198,13 @@ def save_feedback(
                 post_id, content, rating, category, raw_text_feedback,
                 client_id, agent_type, persona, platform, archetype,
                 rag_queries_used, metadata, status, confidence_score,
-                refinement_data, lab_entry_date, actionability_score
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                refinement_data, lab_entry_date, actionability_score, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             post_id, content, rating, category, sanitized_text,
             client_id, agent_type, persona, platform, archetype,
             rag_queries_json, metadata_json, status, confidence_score,
-            refinement_data_json, lab_entry_date, actionability_score
+            refinement_data_json, lab_entry_date, actionability_score, created_at
         ))
 
         feedback_id = cursor.lastrowid

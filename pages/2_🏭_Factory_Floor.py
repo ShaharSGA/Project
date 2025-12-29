@@ -300,6 +300,9 @@ def main():
             ))
 
             if result.success:
+                # Get RAG queries that were used during generation
+                rag_queries = get_rag_query_log()
+
                 # Save results
                 st.session_state.factory_result = {
                     'strategy_output': result.strategy_output,
@@ -307,7 +310,8 @@ def main():
                     'combined_output': result.combined_output,
                     'execution_time': result.execution_time,
                     'rag_summary': result.rag_summary,
-                    'token_usage': result.token_usage
+                    'token_usage': result.token_usage,
+                    'rag_queries_log': rag_queries  # Add RAG queries for Editor's Desk
                 }
                 st.session_state.factory_status = 'completed'
 
