@@ -228,3 +228,40 @@ def initialize_all_tools() -> Dict[str, TXTSearchTool]:
 
     print("✅ All TXTSearchTools initialized successfully!")
     return tools
+
+
+# RAG Query Logging (for monitoring and debugging)
+_rag_query_log = []
+
+
+def log_rag_query(tool_name: str, query: str):
+    """
+    Log a RAG query for monitoring purposes.
+
+    Args:
+        tool_name: Name of the tool used
+        query: Query text
+    """
+    global _rag_query_log
+    _rag_query_log.append({
+        'tool': tool_name,
+        'query': query,
+        'timestamp': str(Path(__file__).stat().st_mtime)  # Simple timestamp
+    })
+
+
+def get_rag_query_log():
+    """
+    Get the current RAG query log.
+
+    Returns:
+        List of RAG queries with tool names and timestamps
+    """
+    global _rag_query_log
+    return _rag_query_log.copy()
+
+
+def clear_rag_query_log():
+    """Clear the RAG query log."""
+    global _rag_query_log
+    _rag_query_log = []
