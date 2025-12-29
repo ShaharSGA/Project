@@ -287,6 +287,36 @@ def _get_css_content():
         margin-bottom: 10px;
     }
 
+    /* Sidebar navigation text visibility */
+    [data-testid="stSidebar"] * {
+        color: #E0E0E0 !important;
+    }
+
+    [data-testid="stSidebar"] a {
+        color: #E0E0E0 !important;
+    }
+
+    [data-testid="stSidebar"] a:hover {
+        color: #9B4DCA !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        color: #E0E0E0 !important;
+    }
+
+    /* Navigation items */
+    [data-testid="stSidebarNav"] {
+        color: #E0E0E0 !important;
+    }
+
+    [data-testid="stSidebarNav"] li {
+        color: #E0E0E0 !important;
+    }
+
+    [data-testid="stSidebarNav"] a {
+        color: #E0E0E0 !important;
+    }
+
     /* ====================
        TABS CUSTOMIZATION
        ==================== */
