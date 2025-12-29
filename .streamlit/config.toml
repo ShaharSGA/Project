@@ -1,0 +1,20 @@
+[server]
+maxUploadSize = 200
+maxMessageSize = 200
+enableXsrfProtection = false
+enableCORS = true
+
+# Important: Increase timeout for CrewAI content generation
+# Default is 60s, but generation can take 2-3 minutes
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+# Optional: Customize app theme
+primaryColor = "#8B5CF6"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F3F4F6"
+textColor = "#1F2937"
+font = "sans serif"

@@ -8,15 +8,38 @@ throughout the codebase. Settings can be overridden via environment variables.
 import os
 from pathlib import Path
 from typing import Literal
+import streamlit as st
+
+# Environment detection (Streamlit Cloud vs Local)
+def is_streamlit_cloud() -> bool:
+    """Detect if running on Streamlit Cloud."""
+    return os.getenv("STREAMLIT_RUNTIME_ENV") is not None or hasattr(st, "runtime")
 
 # Base directories
 BASE_DIR = Path(__file__).parent
-DATA_DIR = BASE_DIR / "Data"
-OUTPUT_DIR = BASE_DIR / "outputs"
+
+# Cloud-aware paths: use /tmp on Streamlit Cloud, local paths otherwise
+if is_streamlit_cloud():
+    DATA_DIR = BASE_DIR / "Data"  # Data files are committed to git, so they're accessible
+    OUTPUT_DIR = Path("/tmp/outputs")  # Ephemeral storage on cloud
+    CHROMADB_DIR = Path("/tmp/.chromadb")  # Ephemeral vector DB
+else:
+    DATA_DIR = BASE_DIR / "Data"
+    OUTPUT_DIR = BASE_DIR / "outputs"
+    CHROMADB_DIR = BASE_DIR / ".chromadb"
+
+# Ensure output directories exist
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+CHROMADB_DIR.mkdir(parents=True, exist_ok=True)
 
 # OpenAI Configuration
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini")
+
+# Supabase Configuration (for Streamlit Cloud deployment)
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+USE_SUPABASE = is_streamlit_cloud() and SUPABASE_URL and SUPABASE_KEY
 
 # Agent Configuration
 class AgentConfig:
@@ -55,7 +78,7 @@ class EmbeddingConfig:
 
     # ChromaDB configuration
     CHROMADB_PROVIDER = "chroma"
-    CHROMADB_PERSIST_DIR = str(BASE_DIR / ".chromadb")
+    CHROMADB_PERSIST_DIR = str(CHROMADB_DIR)
 
     # Collection names
     COLLECTIONS = {
