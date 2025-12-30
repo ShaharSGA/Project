@@ -30,6 +30,89 @@ class CrewExecutionResult:
     token_usage: Optional[Dict] = None
 
 
+def summarize_campaign_bible(full_text: str, max_tokens: int = 500) -> str:
+    """
+    Summarize Campaign Bible to ~500 tokens for context efficiency.
+    Extracts key sections while preserving strategic essence.
+
+    Args:
+        full_text: Full Campaign Bible output from strategy agent
+        max_tokens: Target token count (~4 chars = 1 token)
+
+    Returns:
+        Condensed summary (~500 tokens / ~2000 chars)
+    """
+    if not full_text:
+        return ""
+
+    # Rough token estimation: 4 chars ≈ 1 token
+    max_chars = max_tokens * 4
+
+    # If already small enough, return as-is
+    if len(full_text) <= max_chars:
+        return full_text
+
+    # Extract key sections (common Hebrew headers in Campaign Bible)
+    key_sections = []
+    lines = full_text.split('\n')
+
+    # Priority headers to preserve
+    priority_headers = [
+        'GAP', 'פער',
+        'קהל', 'audience', 'טרגט',
+        'הבטחה', 'promise', 'הצעה',
+        'ארכיטיפ', 'archetype',
+        'מסר', 'message', 'תובנה',
+        'טון', 'tone', 'קול'
+    ]
+
+    current_section = []
+    for line in lines:
+        line_lower = line.lower().strip()
+
+        # Check if line is a header
+        is_header = any(header in line_lower for header in priority_headers)
+
+        if is_header:
+            # Save previous section if exists
+            if current_section:
+                section_text = '\n'.join(current_section)
+                if len(section_text) > 20:  # Skip very short sections
+                    key_sections.append(section_text)
+            # Start new section with header
+            current_section = [line]
+        elif current_section:
+            # Add content to current section
+            current_section.append(line)
+
+    # Add last section
+    if current_section:
+        section_text = '\n'.join(current_section)
+        if len(section_text) > 20:
+            key_sections.append(section_text)
+
+    # Combine sections until we hit char limit
+    summary_parts = []
+    current_length = 0
+
+    for section in key_sections:
+        if current_length + len(section) + 2 < max_chars:  # +2 for \n\n
+            summary_parts.append(section)
+            current_length += len(section) + 2
+        else:
+            # Truncate last section to fit
+            remaining = max_chars - current_length - 50  # Reserve 50 for ellipsis
+            if remaining > 100:
+                summary_parts.append(section[:remaining] + "...")
+            break
+
+    if not summary_parts:
+        # Fallback: just truncate to char limit
+        return full_text[:max_chars] + "\n\n[...המשך Campaign Bible...]"
+
+    return '\n\n'.join(summary_parts)
+
+
 async def execute_crew_async(
     inputs: Dict,
     tools: Dict,

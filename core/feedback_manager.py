@@ -1,91 +1,66 @@
 """
-Feedback Manager - CRUD Operations and Data Sanitization
+Feedback Manager - CRUD Operations and Data Sanitization (Supabase Only)
 
 This module handles all database operations for the feedback loop system.
 It provides functions for:
-- Database initialization
 - Feedback sanitization (PII removal, prompt injection prevention)
 - CRUD operations (Create, Read, Update, Delete)
 - Pattern retrieval with filtering
 
 Part of the Three-Tier Closed-Loop Feedback System for BDyuk.AI
+
+NOTE: This module now uses Supabase exclusively for cloud deployment.
+SQLite code has been removed (see git history for SQLite implementation).
 """
 
-import sqlite3
+# NOTE: SQLite imports removed - using Supabase only
+# import sqlite3  # OLD - Removed for Supabase-only deployment
+
 import re
 import json
-import os
-from pathlib import Path
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Tuple
 
-# Try importing Supabase (may not be installed in dev environment)
-try:
-    from supabase import create_client, Client
-    SUPABASE_AVAILABLE = True
-except ImportError:
-    SUPABASE_AVAILABLE = False
-    Client = None
+# Supabase imports (required)
+from supabase import create_client, Client
 
-# Import configuration (use absolute import to avoid issues)
-try:
-    from config import USE_SUPABASE, SUPABASE_URL, SUPABASE_KEY
-except ImportError:
-    # Fallback if config import fails (shouldn't happen but defensive)
-    USE_SUPABASE = False
-    SUPABASE_URL = ""
-    SUPABASE_KEY = ""
-
-# Database path (for SQLite - local development)
-BASE_DIR = Path(__file__).parent.parent
-DB_PATH = BASE_DIR / "feedback" / "feedback.db"
-SCHEMA_PATH = BASE_DIR / "feedback" / "schema.sql"
+# Import configuration
+from config import SUPABASE_URL, SUPABASE_KEY
 
 # Supabase client (initialized lazily)
 _supabase_client: Optional[Client] = None
 
 
 def _get_supabase_client() -> Client:
-    """Get or create Supabase client."""
+    """
+    Get or create Supabase client (singleton pattern).
+
+    Returns:
+        Supabase client instance
+
+    Raises:
+        ValueError: If SUPABASE_URL or SUPABASE_KEY are not configured
+    """
     global _supabase_client
     if _supabase_client is None:
-        if not SUPABASE_AVAILABLE:
-            raise RuntimeError("Supabase package not installed. Run: pip install supabase")
         if not SUPABASE_URL or not SUPABASE_KEY:
-            raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment/secrets")
+            raise ValueError(
+                "SUPABASE_URL and SUPABASE_KEY must be set in environment/secrets. "
+                "Please configure these in Streamlit Cloud secrets or .env file."
+            )
         _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
     return _supabase_client
 
 
-def init_db(db_path: str = None) -> None:
-    """
-    Initialize database with schema if not exists
-
-    Args:
-        db_path: Optional custom database path (default: feedback/feedback.db)
-    """
-    if db_path is None:
-        db_path = str(DB_PATH)
-
-    # Create feedback directory if needed
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
-
-    try:
-        # Read schema
-        with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
-            schema_sql = f.read()
-
-        # Execute schema
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        cursor.executescript(schema_sql)
-        conn.commit()
-        conn.close()
-
-        print(f"[OK] Database initialized successfully at {db_path}")
-
-    except Exception as e:
-        raise Exception(f"Failed to initialize database: {str(e)}")
+# NOTE: init_db() removed - Supabase table is managed via Supabase dashboard
+# SQLite version (for reference):
+# def init_db(db_path: str = None) -> None:
+#     """Initialize SQLite database with schema if not exists"""
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.cursor()
+#     cursor.executescript(schema_sql)
+#     conn.commit()
+#     conn.close()
 
 
 def sanitize_feedback(text: str) -> str:
@@ -156,7 +131,7 @@ def save_feedback(
     rag_queries_used: List[str],
     metadata: Dict,
     confidence_score: float,
-    db_path: str = None,
+    db_path: str = None,  # Kept for API compatibility (ignored)
     # Refinement Lab fields (optional)
     refinement_data: Dict = None,
     lab_entry_date: str = None,
@@ -164,7 +139,7 @@ def save_feedback(
     status: str = None  # NEW: Allow explicit status override
 ) -> int:
     """
-    Save feedback to database with auto-status assignment or explicit status
+    Save feedback to Supabase database with auto-status assignment or explicit status
 
     Status logic (if status not explicitly provided):
     - confidence >= 0.8 → status='approved'
@@ -187,15 +162,19 @@ def save_feedback(
         rag_queries_used: List of RAG queries
         metadata: Additional metadata (dict)
         confidence_score: Calculated confidence (0-1)
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
         status: Optional explicit status (overrides confidence-based logic)
+        refinement_data: Optional refinement Q&A data (dict)
+        lab_entry_date: Optional timestamp for lab entry
+        actionability_score: Optional actionability score (0-1)
 
     Returns:
         feedback_id: ID of inserted record
-    """
-    if db_path is None:
-        db_path = str(DB_PATH)
 
+    Raises:
+        ValueError: If feedback data is invalid
+        Exception: If save operation fails
+    """
     # Determine status: use explicit status if provided, otherwise calculate from confidence
     # Normalize status to lowercase for consistency
     if status is None:
@@ -212,39 +191,59 @@ def save_feedback(
     # Sanitize feedback text
     sanitized_text = sanitize_feedback(raw_text_feedback)
 
-    # Convert lists/dicts to JSON
-    rag_queries_json = json.dumps(rag_queries_used, ensure_ascii=False)
-    metadata_json = json.dumps(metadata, ensure_ascii=False)
-    refinement_data_json = json.dumps(refinement_data, ensure_ascii=False) if refinement_data else None
+    # Get Supabase client
+    supabase = _get_supabase_client()
+
+    # Prepare data for Supabase (JSONB fields stay as dict/list)
+    feedback_data = {
+        'post_id': post_id,
+        'content': content,
+        'rating': rating,
+        'category': category,
+        'raw_text_feedback': sanitized_text,
+        'client_id': client_id,
+        'agent_type': agent_type,
+        'persona': persona,
+        'platform': platform,
+        'archetype': archetype,
+        'rag_queries_used': rag_queries_used,  # Supabase handles JSONB automatically
+        'metadata': metadata,  # Supabase handles JSONB automatically
+        'status': status,
+        'confidence_score': confidence_score,
+        'refinement_data': refinement_data,  # JSONB or None
+        'lab_entry_date': lab_entry_date,  # Timestamp or None
+        'actionability_score': actionability_score,  # Float or None
+        'created_at': datetime.now().isoformat()
+    }
 
     try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+        # Insert into Supabase
+        response = supabase.table('feedback').insert(feedback_data).execute()
 
-        cursor.execute("""
-            INSERT INTO feedback (
-                post_id, content, rating, category, raw_text_feedback,
-                client_id, agent_type, persona, platform, archetype,
-                rag_queries_used, metadata, status, confidence_score,
-                refinement_data, lab_entry_date, actionability_score
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            post_id, content, rating, category, sanitized_text,
-            client_id, agent_type, persona, platform, archetype,
-            rag_queries_json, metadata_json, status, confidence_score,
-            refinement_data_json, lab_entry_date, actionability_score
-        ))
+        # Get inserted record ID
+        if response.data and len(response.data) > 0:
+            feedback_id = response.data[0]['id']
+            return feedback_id
+        else:
+            raise Exception("Insert succeeded but no data returned")
 
-        feedback_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
-
-        return feedback_id
-
-    except sqlite3.IntegrityError as e:
-        raise ValueError(f"Invalid feedback data: {str(e)}")
     except Exception as e:
-        raise Exception(f"Failed to save feedback: {str(e)}")
+        # Map Supabase errors to appropriate exceptions
+        error_msg = str(e).lower()
+        if 'unique' in error_msg or 'constraint' in error_msg or 'duplicate' in error_msg:
+            raise ValueError(f"Invalid feedback data (constraint violation): {str(e)}")
+        raise Exception(f"Failed to save feedback to Supabase: {str(e)}")
+
+
+# SQLite version (for reference):
+# def save_feedback(...) -> int:
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.cursor()
+#     cursor.execute("INSERT INTO feedback (...) VALUES (...)", (...))
+#     feedback_id = cursor.lastrowid
+#     conn.commit()
+#     conn.close()
+#     return feedback_id
 
 
 def get_patterns(
@@ -256,10 +255,10 @@ def get_patterns(
     status: str = 'approved',
     min_confidence: float = 0.7,
     limit: int = 50,
-    db_path: str = None
+    db_path: str = None  # Kept for API compatibility (ignored)
 ) -> List[Dict]:
     """
-    Query feedback patterns with filters
+    Query feedback patterns from Supabase with filters
 
     Args:
         client_id: Client identifier
@@ -270,63 +269,59 @@ def get_patterns(
         status: Status filter (default: 'approved')
         min_confidence: Minimum confidence score
         limit: Maximum number of results
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
 
     Returns:
         List of dicts with feedback data
     """
-    if db_path is None:
-        db_path = str(DB_PATH)
+    supabase = _get_supabase_client()
 
     try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row  # Return rows as dicts
-        cursor = conn.cursor()
+        # Build Supabase query
+        query = supabase.table('feedback').select(
+            'id, post_id, content, rating, category, raw_text_feedback, '
+            'client_id, agent_type, persona, platform, archetype, '
+            'confidence_score, created_at, status'
+        )
 
-        # Build query
-        query = """
-            SELECT id, post_id, content, rating, category, raw_text_feedback,
-                   client_id, agent_type, persona, platform, archetype,
-                   confidence_score, created_at, status
-            FROM feedback
-            WHERE client_id = ?
-              AND agent_type = ?
-              AND status = ?
-              AND confidence_score >= ?
-        """
-        params = [client_id, agent_type, status, min_confidence]
+        # Apply filters
+        query = query.eq('client_id', client_id)\
+                     .eq('agent_type', agent_type)\
+                     .eq('status', status)\
+                     .gte('confidence_score', min_confidence)
 
-        # Add optional filters
+        # Optional filters
         if persona:
-            query += " AND persona = ?"
-            params.append(persona)
+            query = query.eq('persona', persona)
 
         if platform:
-            query += " AND platform = ?"
-            params.append(platform)
+            query = query.eq('platform', platform)
 
         if rating_range:
             min_rating, max_rating = rating_range
-            query += " AND rating BETWEEN ? AND ?"
-            params.extend([min_rating, max_rating])
+            query = query.gte('rating', min_rating).lte('rating', max_rating)
 
-        # Order by confidence (highest first) and limit
-        query += " ORDER BY confidence_score DESC, created_at DESC LIMIT ?"
-        params.append(limit)
+        # Order and limit
+        query = query.order('confidence_score', desc=True)\
+                     .order('created_at', desc=True)\
+                     .limit(limit)
 
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-        conn.close()
+        # Execute query
+        response = query.execute()
 
-        # Convert to list of dicts
-        results = []
-        for row in rows:
-            results.append(dict(row))
-
-        return results
+        return response.data if response.data else []
 
     except Exception as e:
-        raise Exception(f"Failed to retrieve patterns: {str(e)}")
+        raise Exception(f"Failed to retrieve patterns from Supabase: {str(e)}")
+
+
+# SQLite version (for reference):
+# def get_patterns(...) -> List[Dict]:
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.cursor()
+#     cursor.execute("SELECT ... FROM feedback WHERE ... ORDER BY ... LIMIT ?", params)
+#     rows = cursor.fetchall()
+#     return [dict(row) for row in rows]
 
 
 def update_status(
@@ -334,22 +329,19 @@ def update_status(
     new_status: str,
     notes: Optional[str] = None,
     refinement_data: Optional[Dict] = None,
-    db_path: str = None
+    db_path: str = None  # Kept for API compatibility (ignored)
 ) -> None:
     """
-    Update feedback status (for manual review or Lab processing)
+    Update feedback status in Supabase (for manual review or Lab processing)
 
     Args:
         feedback_id: Feedback record ID
         new_status: New status ('approved', 'rejected', 'flagged', 'pending',
-                    'PENDING_REFINEMENT', 'SKIPPED', 'DISCARDED')
+                    'pending_refinement', 'skipped', 'discarded')
         notes: Optional notes about the status change
         refinement_data: Optional refinement Q&A data (dict)
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
     """
-    if db_path is None:
-        db_path = str(DB_PATH)
-
     valid_statuses = ['pending', 'approved', 'rejected', 'flagged',
                       'pending_refinement', 'skipped', 'discarded']
     # Normalize input status to lowercase
@@ -357,33 +349,25 @@ def update_status(
     if new_status not in valid_statuses:
         raise ValueError(f"Invalid status: {new_status}. Must be one of: {valid_statuses}")
 
+    supabase = _get_supabase_client()
+
     try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+        # Prepare update data
+        update_data = {
+            'status': new_status,
+            'reviewed_at': datetime.now().isoformat(),
+            'notes': notes
+        }
 
-        # Convert refinement_data to JSON if provided
-        refinement_json = json.dumps(refinement_data, ensure_ascii=False) if refinement_data else None
-
+        # Add refinement_data if provided (Supabase handles JSONB automatically)
         if refinement_data:
-            cursor.execute("""
-                UPDATE feedback
-                SET status = ?,
-                    reviewed_at = CURRENT_TIMESTAMP,
-                    notes = ?,
-                    refinement_data = ?
-                WHERE id = ?
-            """, (new_status, notes, refinement_json, feedback_id))
-        else:
-            cursor.execute("""
-                UPDATE feedback
-                SET status = ?,
-                    reviewed_at = CURRENT_TIMESTAMP,
-                    notes = ?
-                WHERE id = ?
-            """, (new_status, notes, feedback_id))
+            update_data['refinement_data'] = refinement_data
 
-        conn.commit()
-        conn.close()
+        # Execute update
+        supabase.table('feedback')\
+            .update(update_data)\
+            .eq('id', feedback_id)\
+            .execute()
 
         # Auto-update feedback learnings file when status changes to 'approved'
         # Note: new_status is already normalized to lowercase
@@ -399,41 +383,55 @@ def update_status(
                 print(f"[WARNING] Failed to auto-update learnings file: {str(e)}")
 
     except Exception as e:
-        raise Exception(f"Failed to update status: {str(e)}")
+        raise Exception(f"Failed to update status in Supabase: {str(e)}")
+
+
+# SQLite version (for reference):
+# def update_status(feedback_id, new_status, notes, refinement_data, db_path) -> None:
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.cursor()
+#     cursor.execute("UPDATE feedback SET status = ?, ... WHERE id = ?", (new_status, ..., feedback_id))
+#     conn.commit()
+#     conn.close()
 
 
 def get_feedback_by_id(
     feedback_id: int,
-    db_path: str = None
+    db_path: str = None  # Kept for API compatibility (ignored)
 ) -> Optional[Dict]:
     """
-    Get single feedback record by ID
+    Get single feedback record by ID from Supabase
 
     Args:
         feedback_id: Feedback record ID
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
 
     Returns:
         Feedback dict or None if not found
     """
-    if db_path is None:
-        db_path = str(DB_PATH)
+    supabase = _get_supabase_client()
 
     try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        response = supabase.table('feedback')\
+            .select('*')\
+            .eq('id', feedback_id)\
+            .execute()
 
-        cursor.execute("SELECT * FROM feedback WHERE id = ?", (feedback_id,))
-        row = cursor.fetchone()
-        conn.close()
-
-        if row:
-            return dict(row)
+        if response.data and len(response.data) > 0:
+            return response.data[0]
         return None
 
     except Exception as e:
-        raise Exception(f"Failed to retrieve feedback: {str(e)}")
+        raise Exception(f"Failed to retrieve feedback from Supabase: {str(e)}")
+
+
+# SQLite version (for reference):
+# def get_feedback_by_id(feedback_id, db_path) -> Optional[Dict]:
+#     conn = sqlite3.connect(db_path)
+#     cursor = conn.cursor()
+#     cursor.execute("SELECT * FROM feedback WHERE id = ?", (feedback_id,))
+#     row = cursor.fetchone()
+#     return dict(row) if row else None
 
 
 def get_recent_feedback(
@@ -441,224 +439,196 @@ def get_recent_feedback(
     agent_type: str,
     days: int = 30,
     min_confidence: float = 0.0,
-    db_path: str = None
+    db_path: str = None  # Kept for API compatibility (ignored)
 ) -> List[Dict]:
     """
-    Get recent feedback for consistency scoring
+    Get recent feedback from Supabase for consistency scoring
 
     Args:
         client_id: Client identifier
         agent_type: Agent type
         days: Number of days to look back
         min_confidence: Minimum confidence score
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
 
     Returns:
         List of feedback dicts
     """
-    if db_path is None:
-        db_path = str(DB_PATH)
+    supabase = _get_supabase_client()
 
     try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
         # Calculate cutoff date
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
 
-        cursor.execute("""
-            SELECT id, rating, category, raw_text_feedback, persona, platform,
-                   archetype, confidence_score, created_at
-            FROM feedback
-            WHERE client_id = ?
-              AND agent_type = ?
-              AND confidence_score >= ?
-              AND created_at >= ?
-            ORDER BY created_at DESC
-        """, (client_id, agent_type, min_confidence, cutoff))
+        response = supabase.table('feedback')\
+            .select('id, rating, category, raw_text_feedback, persona, platform, '
+                   'archetype, confidence_score, created_at')\
+            .eq('client_id', client_id)\
+            .eq('agent_type', agent_type)\
+            .gte('confidence_score', min_confidence)\
+            .gte('created_at', cutoff)\
+            .order('created_at', desc=True)\
+            .execute()
 
-        rows = cursor.fetchall()
-        conn.close()
-
-        return [dict(row) for row in rows]
+        return response.data if response.data else []
 
     except Exception as e:
-        raise Exception(f"Failed to retrieve recent feedback: {str(e)}")
+        raise Exception(f"Failed to retrieve recent feedback from Supabase: {str(e)}")
 
 
 def get_lab_queue(
     client_id: str,
     agent_type: str = None,
     limit: int = 100,
-    db_path: str = None
+    db_path: str = None  # Kept for API compatibility (ignored)
 ) -> List[Dict]:
     """
-    Get feedback items pending refinement in the Lab
+    Get feedback items pending refinement in the Lab from Supabase
 
     Args:
         client_id: Client identifier
         agent_type: Optional agent type filter
         limit: Maximum number of results (default: 100)
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
 
     Returns:
         List of feedback dicts awaiting refinement, ordered by entry date (oldest first)
     """
-    if db_path is None:
-        db_path = str(DB_PATH)
+    supabase = _get_supabase_client()
 
     try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        query = """
-            SELECT id, post_id, content, rating, category, raw_text_feedback,
-                   client_id, agent_type, persona, platform, archetype,
-                   confidence_score, actionability_score, lab_entry_date, created_at
-            FROM feedback
-            WHERE client_id = ?
-              AND LOWER(status) = 'pending_refinement'
-        """
-        params = [client_id]
+        query = supabase.table('feedback')\
+            .select('id, post_id, content, rating, category, raw_text_feedback, '
+                   'client_id, agent_type, persona, platform, archetype, '
+                   'confidence_score, actionability_score, lab_entry_date, created_at')\
+            .eq('client_id', client_id)\
+            .eq('status', 'pending_refinement')
 
         if agent_type:
-            query += " AND agent_type = ?"
-            params.append(agent_type)
+            query = query.eq('agent_type', agent_type)
 
         # Order by lab entry date (oldest first - FIFO)
-        query += " ORDER BY lab_entry_date ASC, created_at ASC LIMIT ?"
-        params.append(limit)
+        response = query.order('lab_entry_date', desc=False)\
+                       .order('created_at', desc=False)\
+                       .limit(limit)\
+                       .execute()
 
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-        conn.close()
-
-        return [dict(row) for row in rows]
+        return response.data if response.data else []
 
     except Exception as e:
-        raise Exception(f"Failed to retrieve lab queue: {str(e)}")
+        raise Exception(f"Failed to retrieve lab queue from Supabase: {str(e)}")
 
 
 def auto_age_lab_items(
     days_threshold: int = 7,
-    db_path: str = None
+    db_path: str = None  # Kept for API compatibility (ignored)
 ) -> int:
     """
-    Auto-promote old lab items to SKIPPED status
+    Auto-promote old lab items to SKIPPED status in Supabase
 
     Items that have been in PENDING_REFINEMENT for > days_threshold
     are automatically marked as SKIPPED to prevent backlog buildup.
 
     Args:
         days_threshold: Number of days before auto-skipping (default: 7)
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
 
     Returns:
         Number of items auto-aged
     """
-    if db_path is None:
-        db_path = str(DB_PATH)
+    supabase = _get_supabase_client()
 
     try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-
         # Calculate cutoff date
         cutoff = (datetime.now() - timedelta(days=days_threshold)).isoformat()
 
-        cursor.execute("""
-            UPDATE feedback
-            SET status = 'skipped',
-                notes = 'Auto-aged: No refinement after ' || ? || ' days'
-            WHERE LOWER(status) = 'pending_refinement'
-              AND lab_entry_date < ?
-        """, (days_threshold, cutoff))
+        # First, get items to update (to count them)
+        items_to_age = supabase.table('feedback')\
+            .select('id')\
+            .eq('status', 'pending_refinement')\
+            .lt('lab_entry_date', cutoff)\
+            .execute()
 
-        count = cursor.rowcount
-        conn.commit()
-        conn.close()
+        count = len(items_to_age.data) if items_to_age.data else 0
+
+        if count > 0:
+            # Update items to 'skipped' status
+            supabase.table('feedback')\
+                .update({
+                    'status': 'skipped',
+                    'notes': f'Auto-aged: No refinement after {days_threshold} days'
+                })\
+                .eq('status', 'pending_refinement')\
+                .lt('lab_entry_date', cutoff)\
+                .execute()
 
         return count
 
     except Exception as e:
-        raise Exception(f"Failed to auto-age lab items: {str(e)}")
+        raise Exception(f"Failed to auto-age lab items in Supabase: {str(e)}")
 
 
 def get_feedback_stats(
     client_id: str,
     agent_type: str = None,
-    db_path: str = None
+    db_path: str = None  # Kept for API compatibility (ignored)
 ) -> Dict:
     """
-    Get aggregate statistics for feedback
+    Get aggregate statistics for feedback from Supabase
 
     Args:
         client_id: Client identifier
         agent_type: Optional agent type filter
-        db_path: Optional custom database path
+        db_path: (Ignored - kept for API compatibility)
 
     Returns:
         Dict with statistics
     """
-    if db_path is None:
-        db_path = str(DB_PATH)
+    supabase = _get_supabase_client()
 
     try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-
         # Build base query
-        base_where = "WHERE client_id = ?"
-        params = [client_id]
+        query = supabase.table('feedback').select('*').eq('client_id', client_id)
 
         if agent_type:
-            base_where += " AND agent_type = ?"
-            params.append(agent_type)
+            query = query.eq('agent_type', agent_type)
 
-        # Total count
-        cursor.execute(f"SELECT COUNT(*) FROM feedback {base_where}", params)
-        total = cursor.fetchone()[0]
+        # Get all feedback records
+        response = query.execute()
+        all_feedback = response.data if response.data else []
+
+        # Calculate statistics
+        total = len(all_feedback)
 
         # By status
-        cursor.execute(f"""
-            SELECT status, COUNT(*) as count
-            FROM feedback {base_where}
-            GROUP BY status
-        """, params)
-        by_status = dict(cursor.fetchall())
+        by_status = {}
+        for item in all_feedback:
+            status = item.get('status', 'unknown')
+            by_status[status] = by_status.get(status, 0) + 1
 
         # Average confidence
-        cursor.execute(f"""
-            SELECT AVG(confidence_score) FROM feedback {base_where}
-        """, params)
-        avg_confidence = cursor.fetchone()[0] or 0.0
+        confidence_scores = [item.get('confidence_score', 0) for item in all_feedback if item.get('confidence_score') is not None]
+        avg_confidence = round(sum(confidence_scores) / len(confidence_scores), 2) if confidence_scores else 0.0
 
         # Average rating
-        cursor.execute(f"""
-            SELECT AVG(rating) FROM feedback {base_where}
-        """, params)
-        avg_rating = cursor.fetchone()[0] or 0.0
-
-        conn.close()
+        ratings = [item.get('rating', 0) for item in all_feedback if item.get('rating') is not None]
+        avg_rating = round(sum(ratings) / len(ratings), 2) if ratings else 0.0
 
         return {
             'total': total,
             'by_status': by_status,
-            'avg_confidence': round(avg_confidence, 2),
-            'avg_rating': round(avg_rating, 2)
+            'avg_confidence': avg_confidence,
+            'avg_rating': avg_rating
         }
 
     except Exception as e:
-        raise Exception(f"Failed to retrieve stats: {str(e)}")
+        raise Exception(f"Failed to retrieve stats from Supabase: {str(e)}")
 
 
-# Initialize database on module import (if schema exists)
-if SCHEMA_PATH.exists() and not DB_PATH.exists():
-    try:
-        init_db()
-    except Exception as e:
-        # Log error but don't fail - database will be initialized on first use
-        import logging
-        logging.warning(f"Could not auto-initialize database: {e}")
+# NOTE: Database initialization removed - Supabase table is managed via Supabase dashboard
+# SQLite auto-init code (for reference):
+# if SCHEMA_PATH.exists() and not DB_PATH.exists():
+#     try:
+#         init_db()
+#     except Exception as e:
+#         logging.warning(f"Could not auto-initialize database: {e}")

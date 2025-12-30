@@ -32,13 +32,24 @@ else:
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 CHROMADB_DIR.mkdir(parents=True, exist_ok=True)
 
-# OpenAI Configuration
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini")
+# OpenAI Configuration - Support both st.secrets (Cloud) and .env (Local)
+def get_secret(key: str, default: str = "") -> str:
+    """Get secret from Streamlit secrets (Cloud) or environment (Local)."""
+    try:
+        # Try Streamlit secrets first (Cloud deployment)
+        if hasattr(st, 'secrets') and key in st.secrets:
+            return st.secrets[key]
+    except:
+        pass
+    # Fallback to environment variable (Local development)
+    return os.getenv(key, default)
+
+OPENAI_API_KEY = get_secret("OPENAI_API_KEY", "")
+OPENAI_MODEL_NAME = get_secret("OPENAI_MODEL_NAME", "gpt-4o-mini")
 
 # Supabase Configuration (for Streamlit Cloud deployment)
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+SUPABASE_URL = get_secret("SUPABASE_URL", "")
+SUPABASE_KEY = get_secret("SUPABASE_KEY", "")
 USE_SUPABASE = is_streamlit_cloud() and SUPABASE_URL and SUPABASE_KEY
 
 # Agent Configuration

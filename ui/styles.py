@@ -66,6 +66,8 @@ def _get_css_content():
         direction: rtl;
         text-align: right;
         font-family: 'Arial', 'Segoe UI', 'Tahoma', sans-serif;
+        color: #FFFFFF !important;
+        background-color: #2D2D44 !important;
     }
 
     /* ====================

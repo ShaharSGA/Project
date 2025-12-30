@@ -209,11 +209,17 @@ def display_post_card(post, post_id: str):
                         rag_queries = list(rag_queries.keys())
 
                     # Get historical data for consistency scoring (use correct agent_type)
-                    historical = get_recent_feedback(
-                        client_id=client_id,
-                        agent_type=agent_type,  # Use platform-specific agent type
-                        days=30
-                    )
+                    try:
+                        historical = get_recent_feedback(
+                            client_id=client_id,
+                            agent_type=agent_type,  # Use platform-specific agent type
+                            days=30
+                        )
+                    except Exception as e:
+                        # Fallback if database not configured (local dev without Supabase)
+                        historical = []
+                        if "no such table" not in str(e).lower():
+                            st.warning(f"⚠️ לא ניתן לטעון נתונים היסטוריים: {str(e)}")
 
                     # Prepare feedback data for confidence calculation
                     feedback_data = {
@@ -252,30 +258,36 @@ def display_post_card(post, post_id: str):
                     normalized_status = feedback_status.lower() if feedback_status else None
 
                     # Save to database with triage results
-                    feedback_id = save_feedback(
-                        post_id=unique_post_id,
-                        content=post.content[:200],  # First 200 chars as preview
-                        rating=rating,
-                        category=category,
-                        raw_text_feedback=sanitized_text,
-                        client_id=client_id,
-                        agent_type=agent_type,  # Use platform-specific agent type (linkedin_copywriter, etc.)
-                        persona=persona,
-                        platform=post.platform,
-                        archetype=post.archetype,
-                        rag_queries_used=rag_queries[:10] if rag_queries else [],  # Limit to 10
-                        metadata={
-                            'session_id': session_id,
-                            'generation_time': st.session_state.get('factory_result', {}).get('execution_time', 0),
-                            'word_count': post.word_count
-                        },
-                        confidence_score=confidence,
-                        # Refinement Lab fields
-                        refinement_data=None,  # Will be filled in Lab
-                        lab_entry_date=lab_entry_date,
-                        actionability_score=actionability_score,
-                        status=normalized_status  # CRITICAL: Use triage-determined status (normalized to lowercase)
-                    )
+                    try:
+                        feedback_id = save_feedback(
+                            post_id=unique_post_id,
+                            content=post.content[:200],  # First 200 chars as preview
+                            rating=rating,
+                            category=category,
+                            raw_text_feedback=sanitized_text,
+                            client_id=client_id,
+                            agent_type=agent_type,  # Use platform-specific agent type (linkedin_copywriter, etc.)
+                            persona=persona,
+                            platform=post.platform,
+                            archetype=post.archetype,
+                            rag_queries_used=rag_queries[:10] if rag_queries else [],  # Limit to 10
+                            metadata={
+                                'session_id': session_id,
+                                'generation_time': st.session_state.get('factory_result', {}).get('execution_time', 0),
+                                'word_count': post.word_count
+                            },
+                            confidence_score=confidence,
+                            # Refinement Lab fields
+                            refinement_data=None,  # Will be filled in Lab
+                            lab_entry_date=lab_entry_date,
+                            actionability_score=actionability_score,
+                            status=normalized_status  # CRITICAL: Use triage-determined status (normalized to lowercase)
+                        )
+                    except Exception as e:
+                        # Fallback if database not configured
+                        feedback_id = None
+                        if "no such table" not in str(e).lower():
+                            st.error(f"❌ שגיאה בשמירת משוב: {str(e)}")
 
                     # Show smart toast message based on triage status
                     toast = get_toast_message(feedback_status)

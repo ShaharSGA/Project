@@ -38,6 +38,7 @@ ENV/
 .env
 .env.local
 .env.*.local
+.streamlit/secrets.toml
 
 # ChromaDB - Committed for Streamlit Cloud performance
 # .chromadb/ is now tracked in git for faster cloud deployment
@@ -46,6 +47,11 @@ ENV/
 !.chromadb/**/*.db
 *.sqlite
 !.chromadb/**/*.sqlite*
+
+# SQLite feedback databases (no longer used - migrated to Supabase)
+feedback/*.db
+feedback/**/*.db
+feedback/**/*.sqlite
 
 # Logs
 *.log
