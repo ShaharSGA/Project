@@ -76,8 +76,7 @@ class EmbeddingConfig:
     DIMENSIONS = int(os.getenv("EMBEDDING_DIMENSIONS", "1536"))
     PROVIDER = "openai"
 
-    # ChromaDB configuration
-    CHROMADB_PROVIDER = "chromadb"
+    # ChromaDB configuration (using direct chroma provider, not CrewAI RAG)
     CHROMADB_PERSIST_DIR = str(CHROMADB_DIR)
 
     # Collection names
@@ -265,9 +264,9 @@ def get_vectordb_config(collection_name: str) -> dict:
         Dictionary with vector DB configuration
     """
     return {
-        "provider": EmbeddingConfig.CHROMADB_PROVIDER,
+        "provider": "chroma",  # Use direct ChromaDB, not CrewAI RAG factory
         "config": {
-            "collection_name": collection_name
-            # Note: persist_directory is handled by TXTSearchTool internally
+            "collection_name": collection_name,
+            "dir": str(CHROMADB_DIR)  # Persist directory for ChromaDB
         }
     }
