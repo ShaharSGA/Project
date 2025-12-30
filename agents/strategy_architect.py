@@ -4,17 +4,17 @@ Analyzes business data and creates strategic briefs using Dana's methodology
 """
 
 from crewai import Agent
-from crewai_tools import TXTSearchTool
+from crewai_tools import BaseTool
 from langchain_openai import ChatOpenAI
 from config import AgentConfig
 
 
-def create_strategy_architect_agent(methodology_tool: TXTSearchTool) -> Agent:
+def create_strategy_architect_agent(methodology_tool: BaseTool) -> Agent:
     """
     Factory function to create Strategy Architect agent with RAG tool.
 
     Args:
-        methodology_tool: TXTSearchTool for searching Dana's methodology
+        methodology_tool: ChromaDB search tool for searching Dana's methodology
 
     Returns:
         Agent configured with methodology search capability
