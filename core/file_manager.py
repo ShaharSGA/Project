@@ -108,10 +108,19 @@ def save_markdown_output(
         # Format token usage
         token_display = ""
         if token_usage:
-            total_tokens = token_usage.get('total_tokens', 0)
-            prompt_tokens = token_usage.get('prompt_tokens', 0)
-            completion_tokens = token_usage.get('completion_tokens', 0)
-            total_cost = token_usage.get('total_cost_usd', 0)
+            # Handle both dict and UsageMetrics object
+            if hasattr(token_usage, 'get'):
+                # It's a dict
+                total_tokens = token_usage.get('total_tokens', 0)
+                prompt_tokens = token_usage.get('prompt_tokens', 0)
+                completion_tokens = token_usage.get('completion_tokens', 0)
+                total_cost = token_usage.get('total_cost_usd', 0)
+            else:
+                # It's a UsageMetrics object
+                total_tokens = getattr(token_usage, 'total_tokens', 0)
+                prompt_tokens = getattr(token_usage, 'prompt_tokens', 0)
+                completion_tokens = getattr(token_usage, 'completion_tokens', 0)
+                total_cost = getattr(token_usage, 'total_cost', 0)
 
             token_display = f"""**שימוש בטוקנים:**
 - Input: {prompt_tokens:,}
