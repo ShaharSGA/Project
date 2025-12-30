@@ -88,7 +88,10 @@ async def run_generation(inputs: dict, tools: dict, progress_placeholder, status
     Returns:
         CrewExecutionResult
     """
-    from tools.txt_search_tools import get_rag_query_log
+    from tools.chromadb_search_tool import get_chromadb_query_log, clear_chromadb_query_log
+
+    # Clear RAG log at start of execution
+    clear_chromadb_query_log()
 
     def progress_callback(message: str, progress: float):
         """Update UI with progress."""
@@ -97,7 +100,7 @@ async def run_generation(inputs: dict, tools: dict, progress_placeholder, status
 
     def update_rag_log():
         """Update RAG log display."""
-        rag_queries = get_rag_query_log()
+        rag_queries = get_chromadb_query_log()
         if rag_queries:
             log_text = ""
             for query in rag_queries[-10:]:  # Show last 10 queries

@@ -171,11 +171,11 @@ async def execute_crew_async(
             getattr(copywriting_task, "output", None)
         )
 
-        # Get RAG summary from tools
+        # Get RAG summary from ChromaDB tools
         rag_summary = {}
         try:
-            from tools.txt_search_tools import get_rag_query_log
-            rag_queries = get_rag_query_log()
+            from tools.chromadb_search_tool import get_chromadb_query_log
+            rag_queries = get_chromadb_query_log()
             rag_summary = {
                 'total_queries': len(rag_queries),
                 'queries': rag_queries

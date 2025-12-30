@@ -12,7 +12,7 @@ from ui.styles import load_custom_css
 st.set_page_config(
     page_title="The Handshake - Dana's Brain",
     page_icon="🤝",
-    layout="centered"
+    layout="wide"
 )
 
 # Load custom styles
@@ -22,24 +22,24 @@ load_custom_css()
 def main():
     """The Handshake - Authentication screen."""
 
-    # Center content
+    # Full width layout
     st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
 
-    # Hero section
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Hero section - full width
+    st.title("🧠 Dana's Brain")
+    st.subheader("Autonomous Marketing AI System")
 
-    with col2:
-        st.title("🧠 Dana's Brain")
-        st.subheader("Autonomous Marketing AI System")
+    st.divider()
 
-        st.divider()
+    # Check if already authenticated
+    if st.session_state.get("authenticated", False):
+        st.success("✅ Already authenticated!")
 
-        # Check if already authenticated
-        if st.session_state.get("authenticated", False):
-            st.success("✅ Already authenticated!")
+        # Client selector in a container - wider layout
+        st.markdown("### 📁 בחר לקוח / Select Client")
 
-            # Client selector (enabled for multi-client support)
-            st.markdown("### 📁 בחר לקוח / Select Client")
+        col1, col2 = st.columns([1, 3])
+        with col1:
             client_options = ["Lierac"]  # Future: load from Data/Clients/
             selected_client = st.radio(
                 "לקוח פעיל / Active Client:",
@@ -49,40 +49,60 @@ def main():
             )
             st.session_state.selected_client = selected_client
 
+        with col2:
             st.info(f"**Project:** {st.session_state.get('selected_client', 'Lierac')}")
             st.info("You're ready to start creating marketing content.")
 
-            # Navigation buttons
-            col_nav1, col_nav2, col_nav3 = st.columns(3)
+        st.divider()
 
-            with col_nav1:
-                if st.button("📐 Go to Architect's Table", type="primary", use_container_width=True):
-                    st.session_state.current_workflow_stage = "architects_table"
-                    st.switch_page("pages/1_📐_Architects_Table.py")
+        # Navigation buttons - equal width with spacing
+        st.markdown("### 🚀 Quick Actions")
+        col_nav1, col_nav2, col_nav3, col_nav4 = st.columns([2, 2, 2, 1])
 
-            with col_nav2:
-                if st.button("📚 Feedback Guide", type="secondary", use_container_width=True):
-                    st.switch_page("pages/5_📚_Feedback_Guide.py")
+        with col_nav1:
+            if st.button("📐 Go to Architect's Table", type="primary", use_container_width=True, key="nav_architect"):
+                st.session_state.current_workflow_stage = "architects_table"
+                st.switch_page("pages/1_📐_Architects_Table.py")
 
-            with col_nav3:
-                if st.button("🔄 Logout", use_container_width=True):
-                    from core.auth import logout
-                    logout()
-                    st.rerun()
+        with col_nav2:
+            if st.button("📚 Feedback Guide", type="secondary", use_container_width=True, key="nav_guide"):
+                st.switch_page("pages/5_📚_Feedback_Guide.py")
 
-            st.divider()
+        with col_nav3:
+            if st.button("🔄 Logout", use_container_width=True, key="nav_logout"):
+                from core.auth import logout
+                logout()
+                st.rerun()
 
+        # Empty column for spacing
+        with col_nav4:
+            pass
+
+        st.divider()
+
+        # Quick Links in two columns for better layout
+        col_links1, col_links2 = st.columns(2)
+
+        with col_links1:
             st.markdown("""
             ### 📖 Quick Links
             - **📐 Architect's Table** - תכנן קמפיין חדש
             - **🏭 Factory Floor** - ייצר תוכן
             - **✍️ Editor's Desk** - סקור ותן פידבק
+            """)
+
+        with col_links2:
+            st.markdown("""
+            ###
             - **⚗️ Refinement Lab** - שפר פידבקים
             - **📚 Feedback Guide** - למד על מערכת הפידבק
             """)
 
-        else:
-            # Authentication form
+    else:
+        # Authentication form - centered for better UX
+        col1, col2, col3 = st.columns([1, 2, 1])
+
+        with col2:
             st.markdown("### 🔐 Enter Access Code")
 
             with st.form("auth_form"):
@@ -106,12 +126,6 @@ def main():
                             st.error("❌ Incorrect password. Please try again.")
                     else:
                         st.warning("Please enter a password")
-
-            st.divider()
-
-            # Initialize default client (before authentication)
-            if 'selected_client' not in st.session_state:
-                st.session_state.selected_client = "Lierac"
 
             st.divider()
 
@@ -143,6 +157,10 @@ def main():
                 """)
 
             st.caption("v1.0.0 - The Handshake")
+
+        # Initialize default client (before authentication)
+        if 'selected_client' not in st.session_state:
+            st.session_state.selected_client = "Lierac"
 
     st.markdown("</div>", unsafe_allow_html=True)
 

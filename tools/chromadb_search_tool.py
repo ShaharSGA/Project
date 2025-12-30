@@ -8,8 +8,12 @@ from crewai_tools import BaseTool
 import chromadb
 from chromadb.config import Settings
 from langchain_openai import OpenAIEmbeddings
+import time
 
 from config import CHROMADB_DIR, OPENAI_API_KEY, EmbeddingConfig
+
+# Global RAG query log (shared with txt_search_tools)
+_rag_query_log = []
 
 if TYPE_CHECKING:
     from chromadb import Collection
@@ -43,6 +47,14 @@ def create_chromadb_search_tool(collection_name: str) -> BaseTool:
 
         def _run(self, query: str) -> str:
             """Search the collection"""
+            # Log query
+            global _rag_query_log
+            _rag_query_log.append({
+                'tool': collection_name,
+                'query': query,
+                'timestamp': time.time()
+            })
+
             # Generate embedding for query
             query_embedding = embeddings.embed_query(query)
 
@@ -86,3 +98,20 @@ def create_platform_specs_search_tool() -> BaseTool:
 def create_post_archetypes_search_tool() -> BaseTool:
     """Search post archetypes without rebuilding embeddings"""
     return create_chromadb_search_tool(EmbeddingConfig.COLLECTIONS["archetype"])
+
+
+def get_chromadb_query_log():
+    """
+    Get the current RAG query log from ChromaDB tools.
+
+    Returns:
+        List of RAG queries with tool names and timestamps
+    """
+    global _rag_query_log
+    return _rag_query_log.copy()
+
+
+def clear_chromadb_query_log():
+    """Clear the ChromaDB RAG query log."""
+    global _rag_query_log
+    _rag_query_log = []

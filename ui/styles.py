@@ -77,9 +77,16 @@ def _get_css_content():
         color: white !important;
         border: none;
         border-radius: 8px;
-        padding: 12px 24px;
+        padding: 16px 24px !important;
         font-weight: 600;
         transition: all 0.3s ease;
+        min-height: 60px !important;
+        height: 60px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: normal !important;
+        line-height: 1.4 !important;
     }
 
     .stButton > button:hover {
@@ -90,6 +97,16 @@ def _get_css_content():
 
     .stButton > button:active {
         transform: translateY(0px);
+    }
+
+    /* Primary button style */
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(90deg, #9B4DCA 0%, #C44DCA 100%) !important;
+    }
+
+    /* Secondary button style */
+    .stButton > button[kind="secondary"] {
+        background: linear-gradient(90deg, #6B3D9A 0%, #8B3DAA 100%) !important;
     }
 
     /* ====================
@@ -287,34 +304,44 @@ def _get_css_content():
         margin-bottom: 10px;
     }
 
-    /* Sidebar navigation text visibility */
+    /* Sidebar navigation text visibility - FORCE WHITE TEXT */
     [data-testid="stSidebar"] * {
-        color: #E0E0E0 !important;
+        color: #FFFFFF !important;
     }
 
     [data-testid="stSidebar"] a {
-        color: #E0E0E0 !important;
+        color: #FFFFFF !important;
+        text-decoration: none !important;
     }
 
     [data-testid="stSidebar"] a:hover {
         color: #9B4DCA !important;
+        background-color: rgba(155, 77, 202, 0.1) !important;
     }
 
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-        color: #E0E0E0 !important;
+        color: #FFFFFF !important;
     }
 
-    /* Navigation items */
+    /* Navigation items - CRITICAL: Force white text on navigation links */
     [data-testid="stSidebarNav"] {
-        color: #E0E0E0 !important;
+        color: #FFFFFF !important;
     }
 
     [data-testid="stSidebarNav"] li {
-        color: #E0E0E0 !important;
+        color: #FFFFFF !important;
     }
 
     [data-testid="stSidebarNav"] a {
-        color: #E0E0E0 !important;
+        color: #FFFFFF !important;
+    }
+
+    [data-testid="stSidebarNav"] a span {
+        color: #FFFFFF !important;
+    }
+
+    [data-testid="stSidebarNav"] [data-testid="stMarkdownContainer"] p {
+        color: #FFFFFF !important;
     }
 
     /* ====================
