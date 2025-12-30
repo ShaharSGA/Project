@@ -108,7 +108,7 @@ class ExecutionConfig:
     """Configuration for crew execution and timeouts."""
 
     # Timeout settings (in seconds)
-    CREW_TIMEOUT = int(os.getenv("CREW_TIMEOUT", "180"))  # 3 minutes
+    CREW_TIMEOUT = int(os.getenv("CREW_TIMEOUT", "300"))  # 5 minutes (allows time for RAG queries with verbose logging)
     TOOL_INIT_TIMEOUT = int(os.getenv("TOOL_INIT_TIMEOUT", "30"))  # 30 seconds
 
     # CrewAI process type
