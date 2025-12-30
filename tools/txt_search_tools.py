@@ -20,6 +20,7 @@ from tools.chromadb_search_tool import (
     create_post_archetypes_search_tool
 )
 
+from config import DataFiles
 from models import ToolInitError
 
 
