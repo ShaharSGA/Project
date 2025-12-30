@@ -197,11 +197,20 @@ def main():
                     total_tokens = getattr(token_usage, 'total_tokens', 0)
                 st.metric("🎯 טוקנים", f"{total_tokens:,}")
             with col_d:
-                # Handle both dict and UsageMetrics object
+                # Calculate cost manually if CrewAI doesn't provide it
                 if hasattr(token_usage, 'get'):
                     total_cost = token_usage.get('total_cost_usd', 0)
+                    prompt_tokens = token_usage.get('prompt_tokens', 0)
+                    completion_tokens = token_usage.get('completion_tokens', 0)
                 else:
                     total_cost = getattr(token_usage, 'total_cost', 0)
+                    prompt_tokens = getattr(token_usage, 'prompt_tokens', 0)
+                    completion_tokens = getattr(token_usage, 'completion_tokens', 0)
+
+                # If CrewAI didn't calculate cost, do it ourselves (gpt-4o-mini pricing)
+                if total_cost == 0 and (prompt_tokens > 0 or completion_tokens > 0):
+                    total_cost = (prompt_tokens * 0.150 / 1_000_000) + (completion_tokens * 0.600 / 1_000_000)
+
                 st.metric("💰 עלות", f"${total_cost:.4f}")
 
         # Token usage breakdown (expandable)
@@ -227,6 +236,12 @@ def main():
                     total_cost = getattr(token_usage, 'total_cost', 0)
                     prompt_cost = getattr(token_usage, 'prompt_cost', 0)
                     completion_cost = getattr(token_usage, 'completion_cost', 0)
+
+                # Manual cost calculation if not provided (gpt-4o-mini pricing)
+                if total_cost == 0 and (prompt_tokens > 0 or completion_tokens > 0):
+                    prompt_cost = prompt_tokens * 0.150 / 1_000_000
+                    completion_cost = completion_tokens * 0.600 / 1_000_000
+                    total_cost = prompt_cost + completion_cost
 
                 col1, col2 = st.columns(2)
                 with col1:

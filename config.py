@@ -114,8 +114,8 @@ class ExecutionConfig:
     # CrewAI process type
     PROCESS_TYPE = "sequential"  # Could be "hierarchical" for parallel
 
-    # Verbose output
-    VERBOSE = os.getenv("VERBOSE", "True").lower() == "true"
+    # Verbose output (WARNING: True consumes MANY extra tokens - use only for debugging)
+    CREW_VERBOSE = os.getenv("CREW_VERBOSE", "False").lower() == "true"
 
 
 # Chainlit Configuration

@@ -420,8 +420,15 @@ def main():
         # Source info
         st.markdown("**📊 Output Sources:**")
         st.caption(f"- Combined output: {len(combined_output)} chars")
-        st.caption(f"- Copy output: {len(result.get('copy_output', ''))} chars")
-        st.caption(f"- Strategy output: {len(result.get('strategy_output', ''))} chars")
+
+        # Safe length calculation - handle both strings and TaskOutput objects
+        copy_out = result.get('copy_output', '')
+        copy_len = len(str(copy_out)) if copy_out else 0
+        st.caption(f"- Copy output: {copy_len} chars")
+
+        strategy_out = result.get('strategy_output', '')
+        strategy_len = len(str(strategy_out)) if strategy_out else 0
+        st.caption(f"- Strategy output: {strategy_len} chars")
 
         st.divider()
 
