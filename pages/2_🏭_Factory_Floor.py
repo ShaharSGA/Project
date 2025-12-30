@@ -182,30 +182,56 @@ def main():
                 st.metric("🔍 חיפושי RAG", total_queries)
             with col_c:
                 token_usage = result.get('token_usage', {})
-                total_tokens = token_usage.get('total_tokens', 0)
+                # Handle both dict and UsageMetrics object
+                if hasattr(token_usage, 'get'):
+                    total_tokens = token_usage.get('total_tokens', 0)
+                else:
+                    total_tokens = getattr(token_usage, 'total_tokens', 0)
                 st.metric("🎯 טוקנים", f"{total_tokens:,}")
             with col_d:
-                total_cost = token_usage.get('total_cost_usd', 0)
+                # Handle both dict and UsageMetrics object
+                if hasattr(token_usage, 'get'):
+                    total_cost = token_usage.get('total_cost_usd', 0)
+                else:
+                    total_cost = getattr(token_usage, 'total_cost', 0)
                 st.metric("💰 עלות", f"${total_cost:.4f}")
 
         # Token usage breakdown (expandable)
         if result.get('token_usage'):
             with st.expander("📊 פירוט טוקנים ועלות"):
                 token_usage = result['token_usage']
-                breakdown = token_usage.get('cost_breakdown', {})
+
+                # Handle both dict and UsageMetrics object
+                if hasattr(token_usage, 'get'):
+                    # It's a dict
+                    breakdown = token_usage.get('cost_breakdown', {})
+                    prompt_tokens = token_usage.get('prompt_tokens', 0)
+                    completion_tokens = token_usage.get('completion_tokens', 0)
+                    total_tokens = token_usage.get('total_tokens', 0)
+                    total_cost = token_usage.get('total_cost_usd', 0)
+                    prompt_cost = breakdown.get('prompt_cost_usd', 0)
+                    completion_cost = breakdown.get('completion_cost_usd', 0)
+                else:
+                    # It's a UsageMetrics object
+                    prompt_tokens = getattr(token_usage, 'prompt_tokens', 0)
+                    completion_tokens = getattr(token_usage, 'completion_tokens', 0)
+                    total_tokens = getattr(token_usage, 'total_tokens', 0)
+                    total_cost = getattr(token_usage, 'total_cost', 0)
+                    prompt_cost = getattr(token_usage, 'prompt_cost', 0)
+                    completion_cost = getattr(token_usage, 'completion_cost', 0)
 
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown("**טוקנים:**")
-                    st.write(f"- Input (Prompt): {token_usage.get('prompt_tokens', 0):,}")
-                    st.write(f"- Output (Completion): {token_usage.get('completion_tokens', 0):,}")
-                    st.write(f"- **סה\"כ:** {token_usage.get('total_tokens', 0):,}")
+                    st.write(f"- Input (Prompt): {prompt_tokens:,}")
+                    st.write(f"- Output (Completion): {completion_tokens:,}")
+                    st.write(f"- **סה\"כ:** {total_tokens:,}")
 
                 with col2:
                     st.markdown("**עלות:**")
-                    st.write(f"- Input: ${breakdown.get('prompt_cost_usd', 0):.4f}")
-                    st.write(f"- Output: ${breakdown.get('completion_cost_usd', 0):.4f}")
-                    st.write(f"- **סה\"כ:** ${token_usage.get('total_cost_usd', 0):.4f}")
+                    st.write(f"- Input: ${prompt_cost:.4f}")
+                    st.write(f"- Output: ${completion_cost:.4f}")
+                    st.write(f"- **סה\"כ:** ${total_cost:.4f}")
 
                 st.caption("💡 מחירים: gpt-4o-mini - $0.150/1M input, $0.600/1M output")
 
