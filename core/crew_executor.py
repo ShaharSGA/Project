@@ -98,7 +98,7 @@ async def execute_crew_async(
                 agents=[strategy_architect, dana_copywriter],
                 tasks=[strategy_task, copywriting_task],
                 process=Process.sequential,
-                verbose=False
+                verbose=True  # CRITICAL: Enable verbose to see tool usage in logs
             )
             return crew.kickoff(inputs=inputs)
 
