@@ -1,177 +1,71 @@
 # -*- coding: utf-8 -*-
 """
-TXTSearchTool initialization for Dana's Brain
-Creates separate tools for each knowledge base with ChromaDB storage
+RAG Tool initialization for Dana's Brain
+Uses pre-built ChromaDB collections for fast performance on Streamlit Cloud
 
-This module handles all RAG tool initialization with proper error handling,
-type safety, and configuration management.
+IMPORTANT: This uses ChromaDBSearchTool which queries existing embeddings
+instead of rebuilding them. This reduces Streamlit Cloud startup from 15+ minutes to seconds.
 """
 
 from pathlib import Path
 from typing import Dict
-from crewai_tools import TXTSearchTool
 
-# Import centralized configuration
-from config import (
-    DataFiles,
-    get_embedding_config,
-    get_llm_config,
-    get_vectordb_config,
-    EmbeddingConfig
+# Use direct ChromaDB search instead of TXTSearchTool to avoid rebuilding embeddings
+from crewai_tools import BaseTool
+from tools.chromadb_search_tool import (
+    create_methodology_search_tool,
+    create_voice_examples_search_tool,
+    create_style_guide_search_tool,
+    create_platform_specs_search_tool,
+    create_post_archetypes_search_tool
 )
+
 from models import ToolInitError
 
 
-def create_methodology_tool() -> TXTSearchTool:
+def create_methodology_tool() -> BaseTool:
     """
     Tool for Strategy Architect to search Dana's methodology.
+    Uses pre-built ChromaDB - NO embedding regeneration!
 
     Returns:
-        TXTSearchTool configured for methodology search
-
-    Raises:
-        FileNotFoundError: If methodology file doesn't exist
-        UnicodeDecodeError: If file has encoding issues
+        ChromaDB search tool configured for methodology search
     """
-    file_path = DataFiles.METHODOLOGY
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"Missing required file: {file_path}")
-
-    try:
-        return TXTSearchTool(
-            txt=str(file_path),
-            config={
-                "llm": get_llm_config(),
-                "embedder": get_embedding_config(),
-                "vectordb": get_vectordb_config(EmbeddingConfig.COLLECTIONS["methodology"])
-            }
-        )
-    except UnicodeDecodeError as e:
-        raise UnicodeDecodeError(
-            e.encoding,
-            e.object,
-            e.start,
-            e.end,
-            f"File {file_path} must be UTF-8 encoded. Please save it with UTF-8 encoding."
-        )
+    return create_methodology_search_tool()
 
 
-def create_voice_examples_tool() -> TXTSearchTool:
-    """
-    Tool for Dana Copywriter to search voice examples.
-
-    Returns:
-        TXTSearchTool configured for voice examples search
-
-    Raises:
-        FileNotFoundError: If voice examples file doesn't exist
-    """
-    file_path = DataFiles.VOICE_EXAMPLES
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"Missing required file: {file_path}")
-
-    return TXTSearchTool(
-        txt=str(file_path),
-        config={
-            "llm": get_llm_config(),
-            "embedder": get_embedding_config(),
-            "vectordb": get_vectordb_config(EmbeddingConfig.COLLECTIONS["voice"])
-        }
-    )
+def create_voice_examples_tool() -> BaseTool:
+    """Tool for Dana Copywriter to search voice examples - uses pre-built ChromaDB"""
+    return create_voice_examples_search_tool()
 
 
-def create_style_guide_tool() -> TXTSearchTool:
-    """
-    Tool for Dana Copywriter to search style guide.
-
-    Returns:
-        TXTSearchTool configured for style guide search
-
-    Raises:
-        FileNotFoundError: If style guide file doesn't exist
-    """
-    file_path = DataFiles.STYLE_GUIDE
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"Missing required file: {file_path}")
-
-    return TXTSearchTool(
-        txt=str(file_path),
-        config={
-            "llm": get_llm_config(),
-            "embedder": get_embedding_config(),
-            "vectordb": get_vectordb_config(EmbeddingConfig.COLLECTIONS["style"])
-        }
-    )
+def create_style_guide_tool() -> BaseTool:
+    """Tool for Dana Copywriter to search style guide - uses pre-built ChromaDB"""
+    return create_style_guide_search_tool()
 
 
-def create_platform_specs_tool() -> TXTSearchTool:
-    """
-    Tool for Dana Copywriter to search platform specifications
-    (LinkedIn, Facebook, Instagram rules).
-
-    Returns:
-        TXTSearchTool configured for platform specs search
-
-    Raises:
-        FileNotFoundError: If platform specs file doesn't exist
-    """
-    file_path = DataFiles.PLATFORM_SPECS
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"Missing required file: {file_path}")
-
-    return TXTSearchTool(
-        txt=str(file_path),
-        config={
-            "llm": get_llm_config(),
-            "embedder": get_embedding_config(),
-            "vectordb": get_vectordb_config(EmbeddingConfig.COLLECTIONS["platform"])
-        }
-    )
+def create_platform_specs_tool() -> BaseTool:
+    """Tool for Dana Copywriter to search platform specs - uses pre-built ChromaDB"""
+    return create_platform_specs_search_tool()
 
 
-def create_post_archetypes_tool() -> TXTSearchTool:
-    """
-    Tool for Dana Copywriter to search post archetype definitions
-    (Heart/Head/Hands framework).
-
-    Returns:
-        TXTSearchTool configured for post archetypes search
-
-    Raises:
-        FileNotFoundError: If post archetypes file doesn't exist
-    """
-    file_path = DataFiles.POST_ARCHETYPES
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"Missing required file: {file_path}")
-
-    return TXTSearchTool(
-        txt=str(file_path),
-        config={
-            "llm": get_llm_config(),
-            "embedder": get_embedding_config(),
-            "vectordb": get_vectordb_config(EmbeddingConfig.COLLECTIONS["archetype"])
-        }
-    )
+def create_post_archetypes_tool() -> BaseTool:
+    """Tool for Dana Copywriter to search post archetypes - uses pre-built ChromaDB"""
+    return create_post_archetypes_search_tool()
 
 
-def initialize_all_tools() -> Dict[str, TXTSearchTool]:
+def initialize_all_tools() -> Dict[str, BaseTool]:
     """
     Initialize all tools at startup with proper error handling.
+    Uses pre-built ChromaDB - NO embedding regeneration!
 
     Returns:
-        Dictionary of initialized TXTSearchTool instances
+        Dictionary of initialized ChromaDBSearchTool instances
 
     Raises:
-        FileNotFoundError: If any required data files are missing
-        UnicodeDecodeError: If any files have encoding issues
-        RuntimeError: If ChromaDB initialization fails
+        RuntimeError: If ChromaDB collections don't exist
     """
-    print("🔧 Initializing TXTSearchTools with ChromaDB...")
+    print("🔧 Loading pre-built ChromaDB tools (no embedding regeneration)...")
 
     # First, validate all files exist
     missing_files = DataFiles.validate_all_exist()
@@ -226,7 +120,7 @@ def initialize_all_tools() -> Dict[str, TXTSearchTool]:
         )
         raise RuntimeError(error.format_for_user())
 
-    print("✅ All TXTSearchTools initialized successfully!")
+    print("✅ All ChromaDB tools loaded successfully (using pre-built embeddings)!")
     return tools
 
 
