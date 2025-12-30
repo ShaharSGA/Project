@@ -88,10 +88,15 @@ async def run_generation(inputs: dict, tools: dict, progress_placeholder, status
     Returns:
         CrewExecutionResult
     """
-    from tools.chromadb_search_tool import get_chromadb_query_log, clear_chromadb_query_log
+    from tools.chromadb_search_tool import (
+        get_chromadb_query_log,
+        clear_chromadb_query_log,
+        clear_embedding_cache
+    )
 
-    # Clear RAG log at start of execution
+    # Clear RAG log and embedding cache at start of execution
     clear_chromadb_query_log()
+    clear_embedding_cache()
 
     def progress_callback(message: str, progress: float):
         """Update UI with progress."""

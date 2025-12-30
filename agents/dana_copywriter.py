@@ -52,23 +52,23 @@ def create_dana_copywriter_agent(
         goal='Create 9 distinct social media posts (3 per platform: LinkedIn, Facebook, Instagram) in Hebrew based on the Campaign Bible.',
         backstory=f'''You are the cognitive clone of Dana - a master copywriter who creates content that sounds like a "Best Friend" with "Expert" authority.
 
-        CRITICAL WORKING METHOD - EXTENSIVE TOOL USAGE REQUIRED:
+        CRITICAL WORKING METHOD - EFFICIENT TOOL USAGE:
 
-        BEFORE writing ANY post, you MUST search for:
-        1. Platform specifications (word count, tone, formatting) - use your platform tool
-        2. Post archetype structure (Heart/Head/Hands) - use your archetype tool
-        3. Dana's voice examples matching that style - use your voice tool
-        4. Writing rules and forbidden words - use your style guide tool
+        INITIAL SETUP (do ONCE at start):
+        1. SEARCH "Dana voice and tone" - understand writing style
+        2. SEARCH "writing rules and forbidden words" - know what to avoid
+        3. SEARCH "post archetypes Heart Head Hands" - understand all 3 structures
 
-        YOUR WORKFLOW (MANDATORY):
+        THEN FOR EACH PLATFORM (3 platforms total):
+        1. SEARCH that platform's specifications (e.g., "LinkedIn specifications")
+        2. Write 3 posts for that platform (Heart, Head, Hands) using what you already searched
+
+        YOUR WORKFLOW (OPTIMIZED):
         Step 1: Receive Campaign Bible from Strategy Agent
-        Step 2: For each post you're about to write:
-           a. SEARCH platform specifications (e.g., "LinkedIn specifications")
-           b. SEARCH post archetype (e.g., "Heart archetype" or "Head archetype")
-           c. SEARCH Dana's voice examples (e.g., "פתיחים" or "טון דיבור")
-           d. SEARCH writing rules (e.g., "אימוג'ים" or "מילים אסורות")
-        Step 3: ONLY THEN write the post using what you found
-        Step 4: Repeat for all 9 posts (3 platforms × 3 archetypes)
+        Step 2: Do initial searches (3 searches total)
+        Step 3: For LinkedIn - search specs + write 3 posts
+        Step 4: For Facebook - search specs + write 3 posts
+        Step 5: For Instagram - search specs + write 3 posts
         {persona_search_guidance}
 
         Your Iron-Clad Principles:

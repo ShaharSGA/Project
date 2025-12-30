@@ -15,6 +15,9 @@ from config import CHROMADB_DIR, OPENAI_API_KEY, EmbeddingConfig
 # Global RAG query log (shared with txt_search_tools)
 _rag_query_log = []
 
+# Global embedding cache to avoid redundant API calls
+_embedding_cache = {}
+
 if TYPE_CHECKING:
     from chromadb import Collection
 
@@ -48,15 +51,20 @@ def create_chromadb_search_tool(collection_name: str) -> BaseTool:
         def _run(self, query: str) -> str:
             """Search the collection"""
             # Log query
-            global _rag_query_log
+            global _rag_query_log, _embedding_cache
             _rag_query_log.append({
                 'tool': collection_name,
                 'query': query,
                 'timestamp': time.time()
             })
 
-            # Generate embedding for query
-            query_embedding = embeddings.embed_query(query)
+            # Generate embedding for query (with cache)
+            query_lower = query.lower().strip()
+            if query_lower in _embedding_cache:
+                query_embedding = _embedding_cache[query_lower]
+            else:
+                query_embedding = embeddings.embed_query(query)
+                _embedding_cache[query_lower] = query_embedding
 
             # Search ChromaDB
             results = collection.query(
@@ -115,3 +123,18 @@ def clear_chromadb_query_log():
     """Clear the ChromaDB RAG query log."""
     global _rag_query_log
     _rag_query_log = []
+
+
+def clear_embedding_cache():
+    """Clear the embedding cache to free memory."""
+    global _embedding_cache
+    _embedding_cache = {}
+
+
+def get_cache_stats():
+    """Get embedding cache statistics."""
+    global _embedding_cache
+    return {
+        'cached_queries': len(_embedding_cache),
+        'memory_saved': len(_embedding_cache) * 0.5  # Rough estimate: 0.5s per API call
+    }
