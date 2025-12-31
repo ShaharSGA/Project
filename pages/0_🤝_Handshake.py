@@ -109,8 +109,7 @@ def main():
                 password = st.text_input(
                     "Password",
                     type="password",
-                    placeholder="Enter your access code",
-                    help="Default password: dana2025"
+                    placeholder="Enter your access code"
                 )
 
                 submit = st.form_submit_button("Enter", use_container_width=True)

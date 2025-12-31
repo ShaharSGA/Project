@@ -10,6 +10,8 @@ instead of rebuilding them. This reduces Streamlit Cloud startup from 15+ minute
 from pathlib import Path
 from typing import Dict
 
+import streamlit as st
+
 # Use direct ChromaDB search instead of TXTSearchTool to avoid rebuilding embeddings
 from crewai_tools import BaseTool
 from tools.chromadb_search_tool import (
@@ -17,7 +19,10 @@ from tools.chromadb_search_tool import (
     create_voice_examples_search_tool,
     create_style_guide_search_tool,
     create_platform_specs_search_tool,
-    create_post_archetypes_search_tool
+    create_post_archetypes_search_tool,
+    # Use centralized RAG logging from chromadb_search_tool
+    get_chromadb_query_log,
+    clear_chromadb_query_log
 )
 
 from config import DataFiles
@@ -55,10 +60,14 @@ def create_post_archetypes_tool() -> BaseTool:
     return create_post_archetypes_search_tool()
 
 
+@st.cache_resource
 def initialize_all_tools() -> Dict[str, BaseTool]:
     """
     Initialize all tools at startup with proper error handling.
     Uses pre-built ChromaDB - NO embedding regeneration!
+
+    Cached with @st.cache_resource to ensure tools are created once
+    and reused across all sessions and page navigations.
 
     Returns:
         Dictionary of initialized ChromaDBSearchTool instances
@@ -125,38 +134,19 @@ def initialize_all_tools() -> Dict[str, BaseTool]:
     return tools
 
 
-# RAG Query Logging (for monitoring and debugging)
-_rag_query_log = []
-
-
-def log_rag_query(tool_name: str, query: str):
-    """
-    Log a RAG query for monitoring purposes.
-
-    Args:
-        tool_name: Name of the tool used
-        query: Query text
-    """
-    global _rag_query_log
-    _rag_query_log.append({
-        'tool': tool_name,
-        'query': query,
-        'timestamp': str(Path(__file__).stat().st_mtime)  # Simple timestamp
-    })
-
+# RAG Query Logging - Redirect to centralized logging in chromadb_search_tool
+# This prevents duplicate logging systems and memory leaks
 
 def get_rag_query_log():
     """
-    Get the current RAG query log.
+    Get the current RAG query log (redirects to centralized log).
 
     Returns:
         List of RAG queries with tool names and timestamps
     """
-    global _rag_query_log
-    return _rag_query_log.copy()
+    return get_chromadb_query_log()
 
 
 def clear_rag_query_log():
-    """Clear the RAG query log."""
-    global _rag_query_log
-    _rag_query_log = []
+    """Clear the RAG query log (redirects to centralized clear)."""
+    clear_chromadb_query_log()

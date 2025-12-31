@@ -130,8 +130,12 @@ async def run_generation(inputs: dict, tools: dict, progress_placeholder, status
         result = await execute_crew_async(inputs, tools, progress_callback)
         return result
     finally:
-        # Stop polling
+        # Stop polling and properly await cancellation to avoid resource leaks
         poll_task.cancel()
+        try:
+            await poll_task
+        except asyncio.CancelledError:
+            pass  # Expected when cancelling
         # Final update
         update_rag_log()
 
@@ -339,14 +343,19 @@ def main():
             # Get tools
             tools = st.session_state.tools
 
-            # Run async generation
-            result = asyncio.run(run_generation(
-                inputs,
-                tools,
-                progress_placeholder,
-                status_placeholder,
-                rag_log_placeholder
-            ))
+            # Run async generation (use new event loop to avoid conflicts with Streamlit)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(run_generation(
+                    inputs,
+                    tools,
+                    progress_placeholder,
+                    status_placeholder,
+                    rag_log_placeholder
+                ))
+            finally:
+                loop.close()
 
             if result.success:
                 # Get RAG queries that were used during generation

@@ -39,7 +39,11 @@ def get_secret(key: str, default: str = "") -> str:
         # Try Streamlit secrets first (Cloud deployment)
         if hasattr(st, 'secrets') and key in st.secrets:
             return st.secrets[key]
-    except:
+    except (AttributeError, KeyError, TypeError) as e:
+        # Expected errors when secrets are not available
+        # AttributeError: st.secrets not initialized
+        # KeyError: key not in secrets
+        # TypeError: secrets access before Streamlit ready
         pass
     # Fallback to environment variable (Local development)
     return os.getenv(key, default)
@@ -48,9 +52,19 @@ OPENAI_API_KEY = get_secret("OPENAI_API_KEY", "")
 OPENAI_MODEL_NAME = get_secret("OPENAI_MODEL_NAME", "gpt-4o-mini")
 
 # Supabase Configuration (for Streamlit Cloud deployment)
-SUPABASE_URL = get_secret("SUPABASE_URL", "")
-SUPABASE_KEY = get_secret("SUPABASE_KEY", "")
-USE_SUPABASE = is_streamlit_cloud() and SUPABASE_URL and SUPABASE_KEY
+# Lazy loading to avoid accessing st.secrets before Streamlit is ready
+def get_supabase_url() -> str:
+    """Get Supabase URL (lazy loaded)."""
+    return get_secret("SUPABASE_URL", "")
+
+def get_supabase_key() -> str:
+    """Get Supabase key (lazy loaded)."""
+    return get_secret("SUPABASE_KEY", "")
+
+# For backwards compatibility - use functions instead
+SUPABASE_URL = ""  # Will be loaded lazily when needed
+SUPABASE_KEY = ""  # Will be loaded lazily when needed
+USE_SUPABASE = is_streamlit_cloud()
 
 # Agent Configuration
 class AgentConfig:
@@ -59,12 +73,12 @@ class AgentConfig:
     # Strategy Architect Agent
     STRATEGY_MODEL = os.getenv("STRATEGY_MODEL", "gpt-4o-mini")
     STRATEGY_TEMPERATURE = float(os.getenv("STRATEGY_TEMP", "0.3"))
-    STRATEGY_VERBOSE = os.getenv("STRATEGY_VERBOSE", "True").lower() == "true"
+    STRATEGY_VERBOSE = os.getenv("STRATEGY_VERBOSE", "False").lower() == "true"  # WARNING: True = ~20K extra tokens!
 
     # Dana Copywriter Agent
     COPYWRITER_MODEL = os.getenv("COPYWRITER_MODEL", "gpt-4o-mini")
     COPYWRITER_TEMPERATURE = float(os.getenv("COPYWRITER_TEMP", "0.7"))
-    COPYWRITER_VERBOSE = os.getenv("COPYWRITER_VERBOSE", "True").lower() == "true"
+    COPYWRITER_VERBOSE = os.getenv("COPYWRITER_VERBOSE", "False").lower() == "true"  # WARNING: True = ~25K extra tokens!
 
     # Persona-specific temperature overrides
     PERSONA_TEMPERATURES = {

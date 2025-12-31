@@ -43,7 +43,26 @@ def authenticate(password: str) -> bool:
 
 
 def logout():
-    """Log out the current user."""
+    """Log out the current user and clear session state to prevent memory leaks."""
+    # Clear large data structures to free memory
+    keys_to_clear = [
+        'factory_result',
+        'generation_history',
+        'editor_post_edits',
+        'editor_post_feedback',
+        'tools',
+        'tools_initialized',
+        'architect_inputs',
+        'factory_status',
+        'last_output_file',
+        'lab_nudge_dismissed',
+    ]
+
+    for key in keys_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+
+    # Reset auth state
     st.session_state.authenticated = False
     st.session_state.current_workflow_stage = "handshake"
     st.session_state.password_attempt = ""

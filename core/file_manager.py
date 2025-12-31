@@ -84,7 +84,10 @@ def save_markdown_output(
                     "Mentor Dana": "טון מנחה וחינוכי, עצות תומכות, גישה לימודית, מומחיות מטפחת"
                 }
                 persona_description = persona_descriptions.get(persona, "")
-        except:
+        except (ImportError, AttributeError, KeyError) as e:
+            # ImportError: config module not available
+            # AttributeError: PersonaConfig not in config
+            # KeyError: persona not in PERSONA_SEARCH_TERMS
             pass
 
         # Format temperature

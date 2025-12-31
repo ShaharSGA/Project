@@ -160,7 +160,7 @@ def extract_campaign_data_with_llm(
 **Output only valid JSON with all content in Hebrew, no additional text:**
 """
 
-    # Call OpenAI
+    # Call OpenAI with timeout to prevent hanging
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -168,7 +168,8 @@ def extract_campaign_data_with_llm(
             {"role": "user", "content": prompt}
         ],
         temperature=0.3,
-        max_tokens=1000
+        max_tokens=1000,
+        timeout=30.0  # 30 second timeout to prevent indefinite hangs
     )
 
     # Parse JSON response

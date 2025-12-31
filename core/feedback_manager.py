@@ -21,19 +21,34 @@ import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Tuple
 
+import streamlit as st
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
 # Supabase imports (required)
 from supabase import create_client, Client
 
-# Import configuration
-from config import SUPABASE_URL, SUPABASE_KEY
-
-# Supabase client (initialized lazily)
-_supabase_client: Optional[Client] = None
+# Import configuration (use lazy loading functions)
+from config import get_supabase_url, get_supabase_key
 
 
+# Retry decorator for transient network errors
+def supabase_retry():
+    """Decorator for retrying Supabase operations on transient failures."""
+    return retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        retry=retry_if_exception_type((ConnectionError, TimeoutError)),
+        reraise=True
+    )
+
+
+@st.cache_resource
 def _get_supabase_client() -> Client:
     """
-    Get or create Supabase client (singleton pattern).
+    Get or create Supabase client (cached for performance).
+
+    Uses @st.cache_resource to ensure the client is created once and reused
+    across all sessions and reruns on Streamlit Cloud.
 
     Returns:
         Supabase client instance
@@ -41,15 +56,16 @@ def _get_supabase_client() -> Client:
     Raises:
         ValueError: If SUPABASE_URL or SUPABASE_KEY are not configured
     """
-    global _supabase_client
-    if _supabase_client is None:
-        if not SUPABASE_URL or not SUPABASE_KEY:
-            raise ValueError(
-                "SUPABASE_URL and SUPABASE_KEY must be set in environment/secrets. "
-                "Please configure these in Streamlit Cloud secrets or .env file."
-            )
-        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    return _supabase_client
+    # Lazy load credentials
+    supabase_url = get_supabase_url()
+    supabase_key = get_supabase_key()
+
+    if not supabase_url or not supabase_key:
+        raise ValueError(
+            "SUPABASE_URL and SUPABASE_KEY must be set in environment/secrets. "
+            "Please configure these in Streamlit Cloud secrets or .env file."
+        )
+    return create_client(supabase_url, supabase_key)
 
 
 # NOTE: init_db() removed - Supabase table is managed via Supabase dashboard
@@ -216,16 +232,22 @@ def save_feedback(
         'created_at': datetime.now().isoformat()
     }
 
-    try:
-        # Insert into Supabase
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        reraise=True
+    )
+    def _insert_with_retry():
+        """Insert feedback with retry logic for transient errors."""
         response = supabase.table('feedback').insert(feedback_data).execute()
-
-        # Get inserted record ID
         if response.data and len(response.data) > 0:
-            feedback_id = response.data[0]['id']
-            return feedback_id
-        else:
-            raise Exception("Insert succeeded but no data returned")
+            return response.data[0]['id']
+        raise Exception("Insert succeeded but no data returned")
+
+    try:
+        # Insert into Supabase with retry logic
+        feedback_id = _insert_with_retry()
+        return feedback_id
 
     except Exception as e:
         # Map Supabase errors to appropriate exceptions

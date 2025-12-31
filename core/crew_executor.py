@@ -263,7 +263,9 @@ async def execute_crew_async(
                 'total_queries': len(rag_queries),
                 'queries': rag_queries
             }
-        except:
+        except (ImportError, AttributeError) as e:
+            # ImportError: chromadb_search_tool not available
+            # AttributeError: function not found in module
             pass
 
         # Extract token usage if available

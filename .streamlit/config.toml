@@ -1,7 +1,7 @@
 [server]
 maxUploadSize = 200
 maxMessageSize = 200
-enableXsrfProtection = false
+enableXsrfProtection = true
 enableCORS = true
 
 # Important: Increase timeout for CrewAI content generation
