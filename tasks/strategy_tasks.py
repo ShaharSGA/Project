@@ -4,8 +4,7 @@ from typing import Dict
 
 def create_strategy_task(agent: Agent, inputs: Dict[str, str]) -> Task:
     """
-    Create a strategic analysis task that relies entirely on RAG searches.
-    The agent must search for methodology and structure - nothing is hardcoded.
+    Create a strategic analysis task using RAG searches.
 
     Args:
         agent: The Strategy Architect agent
@@ -16,39 +15,25 @@ def create_strategy_task(agent: Agent, inputs: Dict[str, str]) -> Task:
     """
     return Task(
         description=f"""
-Analyze this product data and create a comprehensive 'Campaign Bible' strategy document:
+Create a Campaign Bible strategy document for this product:
 
-**Product Data:**
-- Product Name: {inputs['product']}
-- Key Benefits: {inputs['benefits']}
-- Target Audience: {inputs['audience']}
-- The Offer: {inputs['offer']}
-- Selected Persona: {inputs['persona']}
+**Product:** {inputs['product']}
+**Benefits:** {inputs['benefits']}
+**Audience:** {inputs['audience']}
+**Offer:** {inputs['offer']}
+**Persona:** {inputs['persona']}
 
-**YOUR TASK:**
-Create a strategic "Campaign Bible" document that will guide the copywriter.
+**SEARCH FIRST** for Dana's methodology: "GAP Analysis", "ארכיטיפים", "פרוטוקול השקה"
 
-**MANDATORY - SEARCH FIRST:**
-Before writing anything, USE YOUR SEARCH TOOL to find:
-1. Dana's strategic frameworks: Search "שאלות אבחון", "GAP Analysis", "פרוטוקול השקה"
-2. Campaign structure methodology: Search "מבנה מסע פרסום", "ארכיטיפים"
-3. Feature-to-benefit translation method: Search "תרגום פיצ'רים לתועלות"
-4. Platform strategy guidelines: Search "אסטרטגיה לפלטפורמות"
+**OUTPUT (Hebrew only):**
+1. GAP Analysis (מצב נוכחי vs מצב רצוי)
+2. Target Audience Profile
+3. Core Message & Promise
+4. Recommended Archetypes (Heart/Head/Hands)
+5. Platform Strategy Notes
 
-**WORKFLOW:**
-1. SEARCH for Dana's methodology documents
-2. UNDERSTAND the frameworks you found
-3. APPLY those frameworks to analyze the product data
-4. CREATE the Campaign Bible following the structure you discovered
-
-**OUTPUT REQUIREMENTS:**
-- Language: 100% Hebrew (עברית)
-- Structure: Follow the Campaign Bible format found in your searches
-- Content: Based on product data + Dana's methodology
-- Purpose: Provide strategic foundation for the copywriter agent
-
-NEVER invent methodologies - only use what you find through searches.
+DO NOT write posts. Only strategic analysis for the copywriter.
 """,
-        expected_output="""A comprehensive 'Campaign Bible' document in Hebrew following Dana's methodology structure discovered through searches. Should include strategic analysis, gap identification, creative toolkit, and platform-specific recommendations.""",
+        expected_output="Campaign Bible in Hebrew: GAP analysis, audience profile, core message, archetype recommendations.",
         agent=agent
     )

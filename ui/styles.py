@@ -40,9 +40,30 @@ def _get_css_content():
     }
 
     /* ====================
-       RTL SUPPORT (Hebrew)
+       RTL SUPPORT (Hebrew) - ENHANCED
        ==================== */
 
+    /* Global RTL for Hebrew content */
+    .main .block-container {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* Keep LTR for specific elements that need it */
+    .stMetric, .stProgress, code, pre, .stCodeBlock {
+        direction: ltr;
+        text-align: left;
+    }
+
+    /* RTL for markdown content */
+    .stMarkdown, .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+        direction: rtl;
+        text-align: right;
+        font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+        line-height: 1.8;
+    }
+
+    /* RTL container class */
     .rtl-container {
         direction: rtl;
         text-align: right;
@@ -50,24 +71,57 @@ def _get_css_content():
     }
 
     .rtl-text {
-        font-family: 'Arial', 'Segoe UI', 'Tahoma', sans-serif;
+        font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
         line-height: 1.8;
         direction: rtl;
         text-align: right;
     }
 
-    /* RTL for text areas and inputs */
-    [dir="rtl"] {
-        font-family: 'Arial', 'Segoe UI', 'Tahoma', sans-serif;
-    }
-
     /* Force RTL for all text inputs and textareas */
-    textarea, input[type="text"] {
+    textarea, input[type="text"], .stTextInput input, .stTextArea textarea {
         direction: rtl;
         text-align: right;
-        font-family: 'Arial', 'Segoe UI', 'Tahoma', sans-serif;
+        font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
         color: #FFFFFF !important;
         background-color: #2D2D44 !important;
+    }
+
+    /* RTL for selectbox and dropdown */
+    .stSelectbox > div > div {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* RTL for expanders */
+    .streamlit-expanderHeader {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .streamlit-expanderContent {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* RTL for alerts/info boxes */
+    .stAlert > div {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* Fix column order for RTL (reverse) */
+    .stHorizontalBlock {
+        flex-direction: row-reverse;
+    }
+
+    /* Keep metrics LTR but labels RTL */
+    [data-testid="stMetricValue"] {
+        direction: ltr;
+    }
+
+    [data-testid="stMetricLabel"] {
+        direction: rtl;
+        text-align: right;
     }
 
     /* ====================

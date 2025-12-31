@@ -8,8 +8,7 @@ def create_copywriting_task(
     context_task: Optional[Task] = None
 ) -> Task:
     """
-    Create a copywriting task that relies entirely on RAG searches.
-    The agent must search for platform specs, archetypes, voice examples, and style rules.
+    Create a copywriting task using RAG searches for platform specs and voice.
 
     Args:
         agent: The Dana Copywriter agent
@@ -21,83 +20,28 @@ def create_copywriting_task(
     """
     return Task(
         description=f"""
-Create 9 social media posts in Hebrew based on the Campaign Bible from the strategy agent.
+Write 9 Hebrew social media posts based on the Campaign Bible.
 
-**Assignment:**
-- Target Persona: {inputs['persona']}
-- Platforms: LinkedIn (3 posts), Facebook (3 posts), Instagram (3 posts)
-- Post Types: Each platform needs Heart (Emotional), Head (Expert), Hands (Sales)
+**Persona:** {inputs['persona']}
 
-**CRITICAL - EXTENSIVE SEARCHING REQUIRED:**
+**SEARCH ONCE at start:**
+- "Dana voice" for tone examples
+- "post archetypes" for Heart/Head/Hands structure
 
-You have 4 search tools. You MUST use them before writing each post:
+**FOR EACH PLATFORM, search its specs then write 3 posts:**
+1. LinkedIn: Search "LinkedIn specifications" → write Heart, Head, Hands posts
+2. Facebook: Search "Facebook specifications" → write Heart, Head, Hands posts
+3. Instagram: Search "Instagram specifications" → write Heart, Head, Hands posts
 
-**For EVERY post, search in this order:**
-1. **Platform specifications:** Search "LinkedIn specifications" / "Facebook specifications" / "Instagram specifications"
-   - Find: word count, tone, structure, formatting rules
-2. **Post archetype:** Search "Heart archetype" / "Head archetype" / "Hands archetype"
-   - Find: purpose, focus, triggers, structure for that post type
-3. **Dana's voice:** Search "פתיחים" / "טון דיבור" / "היי גורג'ס"
-   - Find: opening hooks, voice patterns, authentic examples
-4. **Writing rules:** Search "כללי כתיבה" / "אימוג'ים" / "מילים אסורות"
-   - Find: formatting rules, emoji usage, forbidden words
-
-**YOUR WORKFLOW (Repeat 9 times - once per post):**
-Step 1: Decide which post you're writing (e.g., "LinkedIn Heart")
-Step 2: Search platform specifications for that platform
-Step 3: Search post archetype for that type (Heart/Head/Hands)
-Step 4: Search Dana's voice examples
-Step 5: Search writing and formatting rules
-Step 6: ONLY NOW write the post using all the information you found
-Step 7: Move to next post
-
-**IRON-CLAD RULES:**
-- NEVER write before searching
-- NEVER guess platform specs - always search
-- NEVER invent Dana's voice - find examples
-- ALWAYS follow word counts from your searches
-- ALL output must be 100% Hebrew
-
-This is not optional. Search -> Understand -> Write (in that order, every time).
+**OUTPUT FORMAT (Hebrew):**
+## LINKEDIN
+### פוסט 1 (Heart) / ### פוסט 2 (Head) / ### פוסט 3 (Hands)
+## FACEBOOK
+### פוסט 1 (Heart) / ### פוסט 2 (Head) / ### פוסט 3 (Hands)
+## INSTAGRAM
+### פוסט 1 (Heart) / ### פוסט 2 (Head) / ### פוסט 3 (Hands)
 """,
-
-        expected_output="""
-# תוכן סופי (All in Hebrew)
-
-## סדרת LINKEDIN
-### פוסט 1 (Heart - רגשי)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
-### פוסט 2 (Head - מומחה)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
-### פוסט 3 (Hands - מכירתי)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
----
-
-## סדרת FACEBOOK
-### פוסט 1 (Heart - רגשי)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
-### פוסט 2 (Head - מומחה)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
-### פוסט 3 (Hands - מכירתי)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
----
-
-## סדרת INSTAGRAM
-### פוסט 1 (Heart - רגשי)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
-### פוסט 2 (Head - מומחה)
-[תוכן בעברית לפי המפרטים שנמצאו]
-
-### פוסט 3 (Hands - מכירתי)
-[תוכן בעברית לפי המפרטים שנמצאו]
-""",
+        expected_output="9 Hebrew posts: 3 per platform (LinkedIn, Facebook, Instagram), each with Heart/Head/Hands variants.",
         agent=agent,
         context=[context_task] if context_task else []
     )
